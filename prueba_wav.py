@@ -202,7 +202,7 @@ class FiltroPasabanda(ProcessorSignal):
 
         
 if __name__ == "__main__":
-    guitar = SenalWav.archive(r"C:\Users\s4mue\Downloads\guitarra-acustica-2-acoustic-guitar-96572.wav")
+    guitar = SenalWav.archive(r"Blue_Slashes\Blue_Slashes\Guitar 5 LEAD 170bpm G Minor DRY.wav")
     guitar.normalize()
     
     
@@ -224,8 +224,8 @@ if __name__ == "__main__":
     control.original_signal_graph(guitar.time(), guitar.data)
     control.show_control_window()
     
-sf.write('guitarra_atanclipped.wav', atan_clipped.aplicar(guitar.data), guitar.samplerate)
-sf.write('guitarra_filtered.wav', filtered.aplicar(atan_clipped.aplicar(guitar.data)), guitar.samplerate)  
+sf.write('guitarra_atanclipped.wav', atan_clipped.apply(guitar.data), guitar.samplerate)
+sf.write('guitarra_filtered.wav', filtered.apply(atan_clipped.apply(guitar.data)), guitar.samplerate)  
 """         
 sf.write('guitarra_hardclipped.wav', hard_clipped.aplicar(guitarra.data), guitarra.samplerate)
 sf.write('guitarra_tanhclipped.wav', tanh_clipped.aplicar(guitarra.data), guitarra.samplerate)
