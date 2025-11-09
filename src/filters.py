@@ -1,5 +1,5 @@
 from scipy.signal import butter, lfilter
-from signal import ProcessorSignal
+from audio_signal import ProcessorSignal
 
 class PassbandFilter(ProcessorSignal):
     

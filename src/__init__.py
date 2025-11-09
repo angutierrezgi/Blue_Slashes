@@ -1,8 +1,9 @@
 from src.control import *
 from src.distortion import *
-from src.signal import *
+from src.audio_signal import *
 from src.graphs import *
 from src.filters import *
+from src.repeated_signals import *
 
 __all__ = [
     'Control',
@@ -15,4 +16,6 @@ __all__ = [
     'WavSignal',
     'Graphs',
     'PassbandFilter',
+    'RepeatedSignals',
+    'Delay'
 ]
