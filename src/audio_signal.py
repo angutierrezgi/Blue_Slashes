@@ -1,14 +1,13 @@
 import numpy as np
 import soundfile as sf
 from scipy.signal import spectrogram
+
 # class that represents a .wav signal
 class WavSignal:
     def __init__(self, data, samplerate):
         self.data = data
         self.samplerate = samplerate
         
-    
-    
     # method to generate time axis based on samplerate and data length
     def time(self):
         return np.arange(len(self.data)) / self.samplerate

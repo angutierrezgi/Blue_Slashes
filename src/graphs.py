@@ -10,13 +10,11 @@ class Graphs:
         self.window = plt.figure(figsize=(12,12), edgecolor='black') #creates a window
         self.grid = GridSpec(3, 1, figure=self.window) # assigns to window 2 rows and 1 column
         
-        
         show_filtered = self.window.add_axes([0.8, 0.92, 0.1, 0.05]) # button for show filtered signal
         self.button_show_filtered = Button(show_filtered, 'Show Filtered', color="#00ffcc") # creates the button
         # links the button to the function that shows the filtered signal
         self.button_show_filtered.on_clicked(self.show_filtered_graph)
     
-        
     def graphing(self, title, ejex, ejey, color='cyan'):
         # creates a subplot in the first row
         clipping_signal = self.window.add_subplot(self.grid[0,:])

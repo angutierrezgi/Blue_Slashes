@@ -1,5 +1,5 @@
 import numpy as np
-from signal import ProcessorSignal
+from audio_signal import ProcessorSignal
 class Distortion(ProcessorSignal):
     def __init__(self, name, gain = 1.0, umbral = 1.0, variation = 0.0, offset = 0.0, mode = "simetric"):
         super().__init__(name)

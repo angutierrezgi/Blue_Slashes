@@ -35,7 +35,6 @@ class Control:
         self.botton_atan.on_clicked(self.show_atan_graph)
         self.botton_algebraic.on_clicked(self.show_algebraic_graph)
     
-   
     def show_original_signal_graph(self, event): 
         self.graphs = Graphs(self.guitar, self.effects)
         time = self.guitar.time()
@@ -59,12 +58,10 @@ class Control:
         frequencies, magnitude = self.guitar.fft(signal_hard, self.guitar.samplerate)
         self.graphs.graphing_fft('FFT HardClippling-Signal', frequencies, magnitude, color='red')
         
-    
     def show_tanh_graph(self, event):
         # takes since prueba_wav.py the effect "Tanh" and applies it to the guitar signal data
         signal_tanh = self.effects['Tanh'].apply(self.guitar.data)
         time = self.guitar.time()
-        
         
         self.graphs = Graphs(self.guitar, self.effects)
         
