@@ -1,0 +1,38 @@
+import soundfile as sf
+from control import Control
+from signal import WavSignal
+from distortion import HardClipping, Softclipping, TanhClipping, AtanClipping, AlgebraicClipping
+from filters import PassbandFilter
+from graphs import Graphs
+def main():
+    guitar = WavSignal.archive('../Guitar G minor 170bpm.wav')
+    guitar.normalize()
+    
+    
+    hard_clipped = HardClipping(0.7)
+
+    tanh_clipped = TanhClipping(3.0)
+
+    atan_clipped = AtanClipping(5.0)
+
+    algebraic_clipped = AlgebraicClipping(7.0)
+
+    filtered = PassbandFilter(400.0, 1000.0, guitar.samplerate, order=2)
+    
+    effects = {'Hard': hard_clipped ,
+               'Tanh': tanh_clipped ,
+               'Atan': atan_clipped,
+               'Algebraic': algebraic_clipped,
+               'Filter': filtered}
+
+    
+    control = Control(guitar, effects) 
+    
+    
+    control.show_control_window()
+    sf.write('guitarra_atanclipped.wav', atan_clipped.apply(guitar.data), guitar.samplerate)
+    sf.write('guitarra_filtered.wav', filtered.apply(atan_clipped.apply(guitar.data)), guitar.samplerate)
+       
+    
+if __name__ == "__main__":
+    main()
