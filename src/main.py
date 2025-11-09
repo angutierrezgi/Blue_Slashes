@@ -9,15 +9,15 @@ def main():
     guitar.normalize()
     
     
-    hard_clipped = HardClipping(0.7)
+    hard_clipped = HardClipping(3.0)
 
-    tanh_clipped = TanhClipping(3.0)
+    tanh_clipped = TanhClipping(7.0)
 
     atan_clipped = AtanClipping(5.0)
 
     algebraic_clipped = AlgebraicClipping(7.0)
 
-    filtered = PassbandFilter(400.0, 1000.0, guitar.samplerate, order=2)
+    filtered = PassbandFilter(1000.0, 2000.0, guitar.samplerate, order=2)
     
     effects = {'Hard': hard_clipped ,
                'Tanh': tanh_clipped ,

@@ -28,19 +28,20 @@ class WavSignal:
     def normalize(self):
         self.data = self.data / np.max(np.abs(self.data))  
      
-    def fft(self, data, samplerate):
-        n = len(data)
-        d = 1 / samplerate
-        fft_values = np.fft.rfft(data)
-        frequencies = np.fft.rfftfreq(n, d=d)
-        magnitude = np.abs(fft_values) / n * 2
-        
-   
-        return frequencies, magnitude
-
+    # fft method that returns frequencies and magnitude
+    def fft(self, data, samplerate, freq_min=0, freq_max=4000):
+        n = len(data) # number of samples
+        d = 1 / samplerate # sample spacing
+        fft_values = np.fft.rfft(data) # compute the FFT for real input
+        frequencies = np.fft.rfftfreq(n, d=d) # corresponding frequencies
+        magnitude = np.abs(fft_values) / n * 2 # normalize the magnitude between 0 and 1
+        limits_graphing = (frequencies >= freq_min) & (frequencies <= freq_max)
+        return frequencies[limits_graphing], magnitude[limits_graphing]
+    
+    # spectrogram method that returns frequency, time and spectrum in dB
     def spectrogram(self, data, samplerate):
-        f, t, spectrum = spectrogram(data, samplerate)
-        spectrum = 10 * np.log10(spectrum + 1e-12)
+        f, t, spectrum = spectrogram(data, samplerate) # computes the spectrogram
+        spectrum = 20 * np.log10(spectrum + 1e-12) # formula to convert to decibels (dB)
         return f, t, spectrum
         
 # class reserved for classes that process the signal in some way to inherit it
