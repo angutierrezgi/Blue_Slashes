@@ -79,7 +79,7 @@ En el proyecto, se utilizan 3 funciones de transferencia, en las cuales se proce
 Produce una distorsión suave y musical. Limita la señal entre -1 y 1.
 
 $$
-y = \tanh(x)
+y = \tanh(kx)
 $$
 
 
@@ -91,24 +91,22 @@ $$
 y = \frac{2}{\pi} \arctan(kx)
 $$
 
-donde:
-- \( k \): controla la ganancia o intensidad de la distorsión.  
-  Valores altos producen una saturación más pronunciada.
-
-
 
 #### 3. Algebraic
-Una alternativa que combina sencillez matemática y comportamiento no lineal controlado.
+Una alternativa que simula una función con las propiedades de funciones de transferencia.
 
 $$
-y = \frac{x}{1 + |x|}
+y = \frac{x}{1 + |kx|}
 $$
 
 
 En todas estas funciones:
 - \( x \): señal de entrada normalizada.  
-- \( y \): señal de salida procesada.  
-Estas funciones garantizan continuidad y suavidad, características esenciales del Soft-Clipping, generando una distorsión cálida y armónicamente rica.
+- \( y \): señal de salida procesada. 
+- \( k \): controla la ganancia o intensidad de la distorsión.  
+  Valores altos producen una saturación más pronunciada.
+
+Estas funciones tienen como principales características esenciales del Soft-Clipping, una respuesta suave y continua, generando una distorsión cálida y amplia armónicamente.
 
 ### Escalabilidad y variaciones asimétricas 
 El código se diseño para que además de modelar simplemente un efecto sonoro, permitiera tener un control experimental sobre este de la más alta escalabilidad, diferenciándolo de pedaleras con un solo tipo de distorsión y parámetros limitados.
