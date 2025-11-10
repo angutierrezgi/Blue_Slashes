@@ -55,13 +55,14 @@ La distorsion es un proceso donde, en una señal con amplitud normalizada se bus
 ### Hard-Clipping
 El Hard-Clipping es un tipo de distorsión que recorta los umbrales de la señal en un valor dado. Al aplicar una ganancia a la señal hard-clippeada y con límites, esta se aplasta entre ellos y produce una distorsión de la señal áspera y agresiva.
 
- ```math
+$$ 
 y =
 \begin{cases}
 A, & x > A \\
 x, & -A \leq x \leq A \\
 -A, & x < -A
 \end{cases}
+$$
 
 ### Soft-Clipping
 El Soft-Clipping es un tipo de distorsión que procesa la señal por funciones de transferencia continuas, que necesariamente tienen una región lineal en valores cercanos a cero y asintotas horizontales que no permiten que la señal misma sobrepase ese valor al aplicarse una ganancia sobre ella.
