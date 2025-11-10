@@ -9,41 +9,18 @@ Los efectos con un comportamiento espectral, como la distorsion o el filtrado, s
 Una interfaz gráfica interactiva permite observar como cada procesamiento influye en la forma de la onda y en su distribucion frecuencial, lo cual ofrece una herramienta de análisis y control en la experimentación sonora.
 
 ## Representacion y procesamiento de la señal .wav
-Para el modelado de la señal, se implementa la clase WavSignal, que se encarga de representar una señal en formato .wav y de realizar sobre ella operaciones que son fundamentales en el dominio del tiempo y de la frecuencia.
+La clase WavSignal modela una señal de audio en formato .wav, permitiendo su análisis en los dominios del tiempo y la frecuencia mediante operaciones fundamentales.
 
-En esta clase se encapsulan las siguientes funciones:
+Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
 
-- Lectura del archivo:
-  Utiliza la librería soundfile para extraer los datos de amplitud (data) y la frecuencia de muestreo (samplerate).
+- Normalización: ajusta la amplitud al rango [−1,1], garantizando una escala uniforme para el procesamiento.
 
-  En caso de que el archivo sea estéreo, se toma un solo canal y se convierte a mono para simplificar el procesamiento y analisis de la señal.
+- Eje temporal: genera un vector de tiempo a partir del número de muestras y la frecuencia de muestreo, facilitando la representación temporal.
 
-- Normalización:
-  La señal se ajusta en un rango de [-1,1], multiplicando a cada muestra el inverso multiplicativo del valor máximo del vector.
+- Transformada Rápida de Fourier (FFT): implementada con numpy.fft, transforma la señal del dominio temporal al de la frecuencia, generando los vectores de frecuencias y magnitudes (normalizadas o en decibelios).
 
-  Esto garantiza que todas las operaciones posteriores se realicen sobre una escala de amplitud fija y uniforme.
-
-- Eje temporal:
-  A partir del número de muestras y la frecuencia de muestreo, se genera un vector de tiempo que permite graficar la señal en el dominio del tiempo.
-
-- Transformada Rápida de Fourier (FFT):
-  Permite analizar el contenido de frecuencias que tiene la señal.
-  La FFT convierte la información del dominio del tiempo al dominio de la frecuencia, generando dos vectores:
-
-  - frequencies: frecuencias en Hz.
-
-  - magnitude: magnitud normalizada o expresada en decibelios (dB).
-
-  Esto permite visualizar qué frecuencias/armónicos dominan en la señal y cómo varían tras aplicar un efecto y determinar un correcto filtrado.
-
-- Espectrograma:
-  Calcula la energía de la señal en el tiempo y la frecuencia simultáneamente.
-  Se obtiene mediante el método spectrogram, extraído del modulo spicy, que devuelve las matrices de frecuencia (f), tiempo (t) y densidad espectral (Sxx).
-
-  En este caso, el espectrograma se representa en decibelios (dB) para apreciar los niveles de energía más y menos intensos. 
-
-  Para representar la intensidad de las frecuencias en una escala logarítmica se utiliza la conversión a decibelios:
-
+- Espectrograma: calculado con scipy.signal.spectrogram, muestra la distribución de energía en el tiempo y la frecuencia. Se representa en decibelios (dB) mediante:
+  
 $$
 S_{dB}(f, t) = 10 \log_{10} (|S(f, t)|^2 + \epsilon)
 $$
