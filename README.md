@@ -154,21 +154,32 @@ $$
 
 Donde:
 
-La frecuencia central es
+- La frecuencia central es
 
 $$
 \omega_0 = \sqrt{\omega_L \cdot \omega_H}
 $$
 
-El ancho de banda es
+- El ancho de banda es
 
 $$
 B = \omega_H - \omega_L
 $$
 
+- n es el orden del filtro	​
+- ωL, ωH​ son las frecuencias de corte inferior y superior.
+
+
+Las frecuencias de corte se normalizan respecto a la frecuencia de Nyquist, definida como la mitad de la frecuencia de muestreo:
+
 $$
 f_{norm} = \frac{f_{cutoff}}{f_s / 2}
 $$
+
+Esto garantiza que los valores estén en el rango [0,1] requerido por los algoritmos de diseño digital.
+
+Así el comportamiento en la salida las frecuencias dentro de la banda mantienen una amplitud casi constante y las frecuencias fuera de la banda se atenúan progresivamente según el orden del filtro.
+Entre mas se incremente el orden, mayor sera la pendiente de atenuación.
 
 ## Diagrama de Clases
 El siguiente diagrama, representa la estructuración del paquete de código hasta el momento:
