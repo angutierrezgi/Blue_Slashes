@@ -170,7 +170,8 @@ Así, sus parámetros son:
 - impact: cantidad de veces la cual el efecto es repetido
 - dampening: porcentaje por el cual la señal repetida se debilita
 
-Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que seguir la siguiente tabla, de manera que al repetir la señal, no suene fuera de lugar, sino que contribuya a la pista.
+Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que seguir la siguiente tabla (valores con respecto a un BPM de 120), de manera que al repetir la señal, no suene fuera de lugar, sino que contribuya a la pista.
+
 | Note Value |	Notes |	Dotted | Triplets |
 | --- | --- | --- | --- |
 | 1/1 (1 Bar) |	2000 ms / 0.5 Hz | 3000 ms / 0.33 Hz | 1333.33 ms / 0.75 Hz |
@@ -183,6 +184,8 @@ Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que 
 | 1/128 | 15.63 ms / 64 Hz | 23.44 ms / 42.67 Hz |	10.42 ms / 96 Hz |
 | 1/256 | 7.81 ms / 128 Hz | 11.72 ms / 85.33 Hz | 	5.21 ms / 192 Hz |
 | 1/512	| 3.91 ms / 256 Hz | 5.86 ms / 170.67 Hz |	2.6 ms / 384 Hz |
+
+Fuente: [Delay & Reverb Calculator](https://anotherproducer.com/online-tools-for-musicians/delay-reverb-time-calculator)
 
 ## Gestión de gráficas - visualización de señales y efectos
 La visualización se realiza mediante matplotlib, integrando las representaciones en el dominio del tiempo, la FFT y el espectrograma.
