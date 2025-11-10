@@ -1,4 +1,5 @@
-# Blue_Slashes - Modelado, simulación y análisis de efectos de audio para música experimental
+# Blue_Slashes 
+### Modelado, simulación y análisis de efectos de audio para música experimental
 Este repositorio contiene el proyecto para la materia de Programación Orientada a Objetos (POO), semestre 2025-2.
 
 Basado en el paradigma de la POO, se modelan distintos efectos/procesadores digitales aplicados a señales de audio en formato '.wav'. Entre ellos por el momento se incluyen la distorsión (Hard y Soft Clipping), el delay y el filtrado pasabanda.
@@ -43,7 +44,7 @@ En caso de que el archivo sea estéreo, se toma un solo canal y se convierte a m
   Para representar la intensidad de las frecuencias en una escala logarítmica se utiliza la conversión a decibelios:
 
 $$
-S_{dB} = 10 \log_{10} (|S|^2)
+S_{dB}(f, t) = 10 \log_{10} (|S(f, t)|^2 + \epsilon)
 $$
 
 donde \( |S| \) es la magnitud del espectro de la señal.
@@ -109,7 +110,27 @@ En todas estas funciones:
 - \( y \): señal de salida procesada.  
 Estas funciones garantizan continuidad y suavidad, características esenciales del Soft-Clipping, generando una distorsión cálida y armónicamente rica.
 
+### Escalabilidad y variaciones asimétricas 
+El código se diseño para que además de modelar simplemente un efecto sonoro, permitiera tener un control experimental sobre este de la más alta escalabilidad, diferenciándolo de pedaleras con un solo tipo de distorsión y parámetros limitados.
 
+Este sistema de distorsión también permite modificar el carácter del efecto mediante la aplicación de asimetrías al Hard-clipping y a las funciones de transferencia. Romper esta simetría en la señal generas componentes armónicos pares y como resultado un sónido mas suave y orgánico.
+
+#### Tipos de Asimetrías implementadas
+- Simétrico:
+  Aplica la misma ganancia en ambos lados de la señal. Suena mas agresivo, pero artificial.
+  
+  
+  $y = \tanh(x \cdot g)$
+
+- Recorte asimétrico:
+  Recorta la señal de manera desigual: el límite positivo y el límite negativo son distintos. Sonido orgánico y cálido.
+  
+  $y = \tanh(\text{clip}(x \cdot g, L_{neg}, L_{pos}))$
+
+- Asimetría por desplazamiento:
+  Desplaza toda la señal hacia arriba o abajo antes de aplicar la función no lineal. Suave, valvular y mas natural.
+   
+  $y = \tanh((x + o) \cdot g)$
 
 ## Diagrama de Clases
 El siguiente diagrama, representa la estructuración del paquete de código hasta el momento:
