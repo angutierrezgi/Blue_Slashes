@@ -181,6 +181,20 @@ Esto garantiza que los valores estén en el rango [0,1] requerido por los algori
 Así el comportamiento en la salida las frecuencias dentro de la banda mantienen una amplitud casi constante y las frecuencias fuera de la banda se atenúan progresivamente según el orden del filtro.
 Entre mas se incremente el orden, mayor sera la pendiente de atenuación.
 
+## Gestión de gráficas
+La visualizacion de señales y efectos se realiza mediante una interfaz graficadora que corresponde a la libreria matplotlib, que nos ayuda a integrar tanto la representación de la señal en el dominio del tiempo, como su representación espectral (FFT y espectograma).
+
+- Clase Control: Esta clase administra la ventana principal de control y la interfaz interactiva.
+  - Genera botones que permiten al usuario seleccionar entre la señal original o la procesada por los efectos para visualizar sus respectivas graficas.
+  - Se encarga de invocar los metodos de Graphs segun la accion del usuario, permitiendo una visualización dinamica con la visualización
+
+- Clase Graphs: Es la clase responsable del trazado de las graficas.
+  - Grafica la señal en el dominio del tiempo, su transformada de fourier (FFT) y el espectrograma.
+  - Permite comparar la señal sin filtrado, con la ya filtrada de manera interactiva para tener conciencia de los cambios en el espectro al aplicar el filtro.
+  - Cada grafica y tipo de visualización se presentan en subplots separados, utilizando colormaps adecuados para una visualización cómoda del espectrograma y escalas lineales para FFT y amplitud temporal.
+
+Esta estructura sigue el principio de responsabilidad única, ya que separa la gestión de la interfaz (Control), de la generación de las graficas (Graphs). Además, siendo integrada con matplotlib, es posible moverse en un entorno flexible para la experimentación sonora y el análisis de efectos.
+
 ## Diagrama de Clases
 El siguiente diagrama, representa la estructuración del paquete de código hasta el momento:
 ```mermaid
