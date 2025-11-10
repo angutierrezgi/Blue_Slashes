@@ -206,6 +206,8 @@ classDiagram
 	    +time()
 	    +archive(route)
 	    +normalize()
+        +fft()
+        +spectogram()
     }
 
     class ProcessorSignal {
@@ -225,44 +227,54 @@ classDiagram
 	    +str name
 	    +str mode
 	    +float gain
-	    -float umbral
-	    -float variation
-	    -float offset
+	    #float umbral
+	    #float variation
+	    #float offset
 	    +apply(WavSignal)
 	    +apply_simetric()
 	    +apply_asimetric_cutting()
 	    +apply_asimetric_displacement()
+        +get_variation()
+        +set_variation()
+        +get_offset()
+        +set_offset()
     }
 
     class HardClipping {
 	    +str name
 	    +str mode
 	    +float gain
-	    -float umbral
-	    -float variation
-	    -float offset
+	    #float umbral
+	    #float variation
+	    #float offset
 	    +apply_simetric()
 	    +apply_asimetric_cutting()
 	    +apply_asimetric_displacement()
+        +get_umbral()
+        +set_umbral()
+        +get_variation()
+        +set_variation()
+        +get_offset()
+        +set_offset()
     }
 
     class SoftClipping {
 	    +str name
 	    +str mode
 	    +float gain
-	    -float umbral
-	    -float variation
-	    -float offset
-	    -limit_asimetric_cuts()
+	    #float umbral
+	    #float variation
+	    #float offset
+	    #limit_asimetric_cuts()
     }
 
     class ClippingTanh {
 	    +str name
 	    +str mode
 	    +float gain
-	    -float umbral
-	    -float variation
-	    -float offset
+	    #float umbral
+	    #float variation
+	    #float offset
 	    +apply_simetric()
 	    +apply_asimetric_cutting()
 	    +apply_asimetric_displacement()
@@ -272,9 +284,9 @@ classDiagram
 	    +str name
 	    +str mode
 	    +float gain
-	    -float umbral
-	    -float variation
-	    -float offset
+	    #float umbral
+	    #float variation
+	    #float offset
 	    +apply_simetric()
 	    +apply_asimetric_cutting()
 	    +apply_asimetric_displacement()
@@ -284,15 +296,35 @@ classDiagram
 	    +str name
 	    +str mode
 	    +float gain
-	    -float umbral
-	    -float variation
-	    -float offset
+	    #float umbral
+	    #float variation
+	    #float offset
 	    +apply_simetric()
 	    +apply_asimetric_cutting()
 	    +apply_asimetric_displacement()
+        
+    }
+    class Control {
+        +array guitar
+        +list efects
+        +str style
+        +show_original_signal_graph()
+        +show_tanh_graph()
+        +show_atan_graph()
+        +show_algebraic_graph()
+        +show_control_window()
+    }
+    class Graphs {
+    +array guitar_signal
+    +list effects
+    +str style
+    +graphing()
+    +graphing_fft()
+    +graphing_spectrogram()
+    +show_filtered_graph()
     }
 
-    ProcessorSignal <-- WavSignal
+    WavSignal <.. ProcessorSignal
     ProcessorSignal <|-- PassbandFilter
     ProcessorSignal <|-- Distortion
     Distortion <|-- HardClipping
@@ -300,4 +332,9 @@ classDiagram
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
+    ProcessorSignal <.. Control
+    WavSignal <.. Control
+    Graphs *.. Control
+    WavSignal <-- Graphs
+    ProcessorSignal <-- Graphs
 ```
