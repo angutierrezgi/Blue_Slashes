@@ -27,6 +27,7 @@ $$
 
 donde \( |S| \) es la magnitud del espectro de la señal.
 
+Todas las representaciones visuales se realizan con Matplotlib, permitiendo interpretar el comportamiento espectral de la señal antes y después del procesamiento.
 
 ## Distorsión 
 La distorsion es un proceso donde, en una señal con amplitud normalizada se busca limitar sus umbrales en un punto fijo, y por medio de una multiplicación (ganancia), esta no tenga mas opción que aplastarse en sus límites.
@@ -158,19 +159,18 @@ Esto garantiza que los valores estén en el rango [0,1] requerido por los algori
 Así el comportamiento en la salida las frecuencias dentro de la banda mantienen una amplitud casi constante y las frecuencias fuera de la banda se atenúan progresivamente según el orden del filtro.
 Entre mas se incremente el orden, mayor sera la pendiente de atenuación.
 
-## Gestión de gráficas
-La visualizacion de señales y efectos se realiza mediante una interfaz graficadora que corresponde a la libreria matplotlib, que nos ayuda a integrar tanto la representación de la señal en el dominio del tiempo, como su representación espectral (FFT y espectograma).
+## Gestión de gráficas - visualización de señales y efectos
+La visualización se realiza mediante matplotlib, integrando las representaciones en el dominio del tiempo, la FFT y el espectrograma.
 
-- Clase Control: Esta clase administra la ventana principal de control y la interfaz interactiva.
-  - Genera botones que permiten al usuario seleccionar entre la señal original o la procesada por los efectos para visualizar sus respectivas graficas.
-  - Se encarga de invocar los metodos de Graphs segun la accion del usuario, permitiendo una visualización dinamica con la visualización
+- Clase Control: administra la ventana principal e interfaz interactiva.
+  - Genera los botones que permiten alternar entre la señal original y las procesadas.
+  - Invoca los métodos de Graphs según la acción del usuario, permitiendo una visualización dinámica.
 
-- Clase Graphs: Es la clase responsable del trazado de las graficas.
-  - Grafica la señal en el dominio del tiempo, su transformada de fourier (FFT) y el espectrograma.
-  - Permite comparar la señal sin filtrado, con la ya filtrada de manera interactiva para tener conciencia de los cambios en el espectro al aplicar el filtro.
-  - Cada grafica y tipo de visualización se presentan en subplots separados, utilizando colormaps adecuados para una visualización cómoda del espectrograma y escalas lineales para FFT y amplitud temporal.
+- Clase Graphs: gestiona el trazado de las gráficas.
+  - Representa la señal en el tiempo, su espectro (FFT) y el espectrograma.
+  - Permite comparar versiones filtradas y no filtradas mediante subplots separados y colormaps adecuados.
 
-Esta estructura sigue el principio de responsabilidad única, ya que separa la gestión de la interfaz (Control), de la generación de las graficas (Graphs). Además, siendo integrada con matplotlib, es posible moverse en un entorno flexible para la experimentación sonora y el análisis de efectos.
+Esta organización respeta el principio de responsabilidad única, separando la interfaz del control de la generación de gráficos, y ofrece un entorno flexible para la experimentación sonora y el análisis de efectos.
 
 ## Diagrama de Clases
 El siguiente diagrama, representa la estructuración del paquete de código hasta el momento:
