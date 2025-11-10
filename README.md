@@ -18,29 +18,29 @@ Utiliza la librería soundfile para extraer los datos de amplitud (data) y la fr
 En caso de que el archivo sea estéreo, se toma un solo canal y se convierte a mono para simplificar el procesamiento y analisis de la señal.
 
 - Normalización:
-La señal se ajusta en un rango de [-1,1], multiplicando a cada muestra el inverso multiplicativo del valor máximo del vector.
+  La señal se ajusta en un rango de [-1,1], multiplicando a cada muestra el inverso multiplicativo del valor máximo del vector.
 
-Esto garantiza que todas las operaciones posteriores se realicen sobre una escala de amplitud fija y uniforme.
+  Esto garantiza que todas las operaciones posteriores se realicen sobre una escala de amplitud fija y uniforme.
 
--Eje temporal:
-A partir del número de muestras y la frecuencia de muestreo, se genera un vector de tiempo que permite graficar la señal en el dominio del tiempo.
+- Eje temporal:
+  A partir del número de muestras y la frecuencia de muestreo, se genera un vector de tiempo que permite graficar la señal en el dominio del tiempo.
 
--Transformada Rápida de Fourier (FFT):
-Permite analizar el contenido de frecuencias que tiene la señal.
-La FFT convierte la información del dominio del tiempo al dominio de la frecuencia, generando dos vectores:
+- Transformada Rápida de Fourier (FFT):
+  Permite analizar el contenido de frecuencias que tiene la señal.
+  La FFT convierte la información del dominio del tiempo al dominio de la frecuencia, generando dos vectores:
 
   -frequencies: frecuencias en Hz.
   -magnitude: magnitud normalizada o expresada en decibelios (dB).
 
-Esto permite visualizar qué frecuencias/armónicos dominan en la señal y cómo varían tras aplicar un efecto y determinar un correcto filtrado.
+  Esto permite visualizar qué frecuencias/armónicos dominan en la señal y cómo varían tras aplicar un efecto y determinar un correcto filtrado.
 
--Espectrograma:
-Calcula la energía de la señal en el tiempo y la frecuencia simultáneamente.
-Se obtiene mediante el método spectrogram, extraído del modulo spicy, que devuelve las matrices de frecuencia (f), tiempo (t) y densidad espectral (Sxx).
+- Espectrograma:
+  Calcula la energía de la señal en el tiempo y la frecuencia simultáneamente.
+  Se obtiene mediante el método spectrogram, extraído del modulo spicy, que devuelve las matrices de frecuencia (f), tiempo (t) y densidad espectral (Sxx).
 
-En este caso, el espectrograma se representa en decibelios (dB) para apreciar los niveles de energía más y menos intensos. 
+  En este caso, el espectrograma se representa en decibelios (dB) para apreciar los niveles de energía más y menos intensos. 
 
-Para representar la intensidad de las frecuencias en una escala logarítmica se utiliza la conversión a decibelios:
+  Para representar la intensidad de las frecuencias en una escala logarítmica se utiliza la conversión a decibelios:
 
 $$
 S_{dB} = 10 \log_{10} (|S|^2)
@@ -64,15 +64,52 @@ x, & -A \leq x \leq A \\
 \end{cases}
 $$
 
+donde:
+- \( x \): señal de entrada normalizada.  
+- \( y \): señal de salida procesada.  
+- \( A \): umbral máximo de amplitud permitido.
+
 ### Soft-Clipping
 El Soft-Clipping es un tipo de distorsión que procesa la señal por funciones de transferencia continuas, que necesariamente tienen una región lineal en valores cercanos a cero y asintotas horizontales que no permiten que la señal misma sobrepase ese valor al aplicarse una ganancia sobre ella.
 
 En el proyecto, se utilizan 3 funciones de transferencia, en las cuales se procesa el vector 'data' que contiene los valores de magnitud de la señal.
 
-### 1. Tanh - Tangente hipérbolica
-La tangente hipérbolica es una función no lineal que cumple con las propiedades de funciones de transferencia para Soft-Clipping, con asintotas horizontales en 1 y -1.
+#### 1. Tangente hiperbólica (tanh)
+Produce una distorsión suave y musical. Limita la señal entre -1 y 1.
 
-$y = \tanh(x)$.
+$$
+y = \tanh(x)
+$$
+
+
+
+#### 2. Arcotangente (arctan)
+Similar a la anterior, pero con una respuesta más progresiva y menos abrupta en la saturación.
+
+$$
+y = \frac{2}{\pi} \arctan(kx)
+$$
+
+donde:
+- \( k \): controla la ganancia o intensidad de la distorsión.  
+  Valores altos producen una saturación más pronunciada.
+
+
+
+#### 3. Algebraic
+Una alternativa que combina sencillez matemática y comportamiento no lineal controlado.
+
+$$
+y = \frac{x}{1 + |x|}
+$$
+
+
+En todas estas funciones:
+- \( x \): señal de entrada normalizada.  
+- \( y \): señal de salida procesada.  
+Estas funciones garantizan continuidad y suavidad, características esenciales del Soft-Clipping, generando una distorsión cálida y armónicamente rica.
+
+
 
 ## Diagrama de Clases
 El siguiente diagrama, representa la estructuración del paquete de código hasta el momento:
