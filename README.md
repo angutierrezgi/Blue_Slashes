@@ -147,6 +147,7 @@ Se utiliza el módulo scipy.signal, específicamente las funciones butter() y lf
 
 ### Fórmulas y fundamentos del filtro
 El filtro pasabanda de Butterworth está definido por la siguiente función de transferencia:
+
 $$
 H(s) = \frac{1}{1 + \left( \frac{B s}{s^2 + \omega_0^2} \right)^{2n}}
 $$
@@ -154,11 +155,13 @@ $$
 Donde:
 
 La frecuencia central es
+
 $$
 \omega_0 = \sqrt{\omega_L \cdot \omega_H}
 $$
 
 El ancho de banda es
+
 $$
 B = \omega_H - \omega_L
 $$
