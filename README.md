@@ -14,9 +14,9 @@ Para el modelado de la señal, se implementa la clase WavSignal, que se encarga 
 En esta clase se encapsulan las siguientes funciones:
 
 - Lectura del archivo:
-Utiliza la librería soundfile para extraer los datos de amplitud (data) y la frecuencia de muestreo (samplerate).
+  Utiliza la librería soundfile para extraer los datos de amplitud (data) y la frecuencia de muestreo (samplerate).
 
-En caso de que el archivo sea estéreo, se toma un solo canal y se convierte a mono para simplificar el procesamiento y analisis de la señal.
+  En caso de que el archivo sea estéreo, se toma un solo canal y se convierte a mono para simplificar el procesamiento y analisis de la señal.
 
 - Normalización:
   La señal se ajusta en un rango de [-1,1], multiplicando a cada muestra el inverso multiplicativo del valor máximo del vector.
@@ -30,8 +30,9 @@ En caso de que el archivo sea estéreo, se toma un solo canal y se convierte a m
   Permite analizar el contenido de frecuencias que tiene la señal.
   La FFT convierte la información del dominio del tiempo al dominio de la frecuencia, generando dos vectores:
 
-  -frequencies: frecuencias en Hz.
-  -magnitude: magnitud normalizada o expresada en decibelios (dB).
+  - frequencies: frecuencias en Hz.
+
+  - magnitude: magnitud normalizada o expresada en decibelios (dB).
 
   Esto permite visualizar qué frecuencias/armónicos dominan en la señal y cómo varían tras aplicar un efecto y determinar un correcto filtrado.
 
@@ -129,6 +130,42 @@ Este sistema de distorsión también permite modificar el carácter del efecto m
   Desplaza toda la señal hacia arriba o abajo antes de aplicar la función no lineal. Suave, valvular y mas natural.
    
   $y = \tanh((x + o) \cdot g)$
+
+## Filtrado Pasabanda
+El filtrado Pasabanda se diseña para dejar pasar solo un rango especifico de frecuencias que viven en la señal, atenuando las que se encuentran por encima o debajo de los limites definidos.
+
+Los parametros son:
+- low_frequency (Hz): frecuencia de corte inferior.
+- high_frequency (Hz): frecuencia de corte superior.
+- sampling_frequency (Hz): frecuencia de muestreo de la señal.
+- order: orden del filtro, que determina la pendiente de atenuación fuera de la banda pasante (en dB/octava).
+
+### Implementación
+Se utiliza el módulo scipy.signal, específicamente las funciones butter() y lfilter().
+- butter() calcula los coeficientes del filtro Butterworth, un tipo de filtro que garantiza una respuesta suave y sin ondulaciones en la banda pasante.
+- lfilter() aplica dichos coeficientes al vector de la señal, generando una versión filtrada.
+
+### Fórmulas y fundamentos del filtro
+El filtro pasabanda de Butterworth está definido por la siguiente función de transferencia:
+$$
+H(s) = \frac{1}{1 + \left( \frac{B s}{s^2 + \omega_0^2} \right)^{2n}}
+$$
+
+Donde:
+
+La frecuencia central es
+$$
+\omega_0 = \sqrt{\omega_L \cdot \omega_H}
+$$
+
+El ancho de banda es
+$$
+B = \omega_H - \omega_L
+$$
+
+$$
+f_{norm} = \frac{f_{cutoff}}{f_s / 2}
+$$
 
 ## Diagrama de Clases
 El siguiente diagrama, representa la estructuración del paquete de código hasta el momento:
