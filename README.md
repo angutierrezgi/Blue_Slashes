@@ -159,6 +159,31 @@ Esto garantiza que los valores estén en el rango [0,1] requerido por los algori
 Así el comportamiento en la salida las frecuencias dentro de la banda mantienen una amplitud casi constante y las frecuencias fuera de la banda se atenúan progresivamente según el orden del filtro.
 Entre mas se incremente el orden, mayor sera la pendiente de atenuación.
 
+## Efectos de Repetición
+Los efectos de Repetición sobre el tiempo, basan su funcionalidad en guardar la señal de audio y repetirla posteriormente con diferentes alteraciones a los datos de entrada.
+
+### Delay
+El delay guarda la señal de audio en la memoria, y la emplea nuevamente según los datos de la pista de audio proveída y los atributos declarados por el usuario. En este caso, fue trabajado por el paquete Soundfile, y su manejo de la data por medio de arrays de la librería Numpy.
+
+Así, sus parámetros son:
+- seconds: segundos después de los cuales se repite la pista de audio
+- impact: cantidad de veces la cual el efecto es repetido
+- dampening: porcentaje por el cual la señal repetida se debilita
+
+Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que seguir la siguiente tabla, de manera que al repetir la señal, no suene fuera de lugar, sino que contribuya a la pista.
+| Note Value |	Notes |	Dotted | Triplets |
+| --- | --- | --- | --- |
+| 1/1 (1 Bar) |	2000 ms / 0.5 Hz | 3000 ms / 0.33 Hz | 1333.33 ms / 0.75 Hz |
+| 1/2 (2 Beats) | 1000 ms / 1 Hz | 1500 ms / 0.67 Hz |	666.67 ms / 1.5 Hz |
+| 1/4 (1 Beat) | 500 ms / 2 Hz |750 ms / 1.33 Hz | 333.33 ms / 3 Hz |
+| 1/8 |	250 ms / 4 Hz |	375 ms / 2.67 Hz |	166.67 ms / 6 Hz |
+| 1/16 | 125 ms / 8 Hz | 187.5 ms / 5.33 Hz |	83.33 ms / 12 Hz |
+| 1/32 | 62.5 ms / 16 Hz |	93.75 ms / 10.67 Hz |	41.67 ms / 24 Hz |
+| 1/64 | 31.25 ms / 32 Hz |	46.88 ms / 21.33 Hz |	20.83 ms / 48 Hz |
+| 1/128 | 15.63 ms / 64 Hz | 23.44 ms / 42.67 Hz |	10.42 ms / 96 Hz |
+| 1/256 | 7.81 ms / 128 Hz | 11.72 ms / 85.33 Hz | 	5.21 ms / 192 Hz |
+| 1/512	| 3.91 ms / 256 Hz | 5.86 ms / 170.67 Hz |	2.6 ms / 384 Hz |
+
 ## Gestión de gráficas - visualización de señales y efectos
 La visualización se realiza mediante matplotlib, integrando las representaciones en el dominio del tiempo, la FFT y el espectrograma.
 
@@ -281,6 +306,27 @@ classDiagram
 	    +apply_asimetric_displacement()
         
     }
+	class RepeatedSignals {
+		+str name
+		#float seconds
+		#int impact
+		+apply()
+	}
+
+	class Delay {
+		+str name
+		#float seconds
+		#int impact
+		#float dampening
+		+apply()
+        +get_seconds()
+        +set_seconds()
+        +get_impact()
+        +set_impact()
+        +get_dampening()
+        +set_dampening()
+	}
+
     class Control {
         +array guitar
         +list efects
@@ -292,23 +338,25 @@ classDiagram
         +show_control_window()
     }
     class Graphs {
-    +array guitar_signal
-    +list effects
-    +str style
-    +graphing()
-    +graphing_fft()
-    +graphing_spectrogram()
-    +show_filtered_graph()
+	    +array guitar_signal
+	    +list effects
+	    +str style
+	    +graphing()
+	    +graphing_fft()
+	    +graphing_spectrogram()
+	    +show_filtered_graph()
     }
 
     WavSignal <.. ProcessorSignal
     ProcessorSignal <|-- PassbandFilter
     ProcessorSignal <|-- Distortion
+	ProcessorSignal <|-- RepeatedSignals
     Distortion <|-- HardClipping
     Distortion <|-- SoftClipping
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
+	RepeatedSignals <|-- Delay
     ProcessorSignal <.. Control
     WavSignal <.. Control
     Graphs *.. Control
