@@ -27,7 +27,8 @@ class PassbandFilter(ProcessorSignal):
         # Here the frequencies outside the limit are attenuated according to the value in dB, limits in -3dB, then they fall according to the order
         signal_filtered = lfilter(b, a, signal)
         return signal_filtered
-    
+
+# oversampler class that increases the sample rate of the signal by a given factor, for better non-lineal processing 
 class Oversampler(ProcessorSignal):
     def __init__(self, factor=4, filter_length=101):
         super().__init__("oversampler")

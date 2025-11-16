@@ -11,11 +11,13 @@ Una interfaz gráfica interactiva permite observar como cada procesamiento influ
 ## Representacion y procesamiento de la señal .wav
 La clase WavSignal modela una señal de audio en formato .wav, permitiendo su análisis en los dominios del tiempo y la frecuencia mediante operaciones fundamentales.
 
-Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
+Librerías utilizadas: soundfile para lectura/escritura de audio, numpy para operaciones numéricas, scipy.signal para análisis espectral, matplotlib para visualización.
 
-- Normalización: ajusta la amplitud al rango [−1,1], garantizando una escala uniforme para el procesamiento.
+- Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
 
-- Eje temporal: genera un vector de tiempo a partir del número de muestras y la frecuencia de muestreo, facilitando la representación temporal.
+- Normalización: ajusta la amplitud al rango [−1,1], garantizando una escala uniforme para el procesamiento. Implementada con numpy para operaciones vectoriales eficientes.
+
+- Eje temporal: genera un vector de tiempo a partir del número de muestras y la frecuencia de muestreo, facilitando la representación temporal usando numpy.arange.
 
 - Transformada Rápida de Fourier (FFT): implementada con numpy.fft, transforma la señal del dominio temporal al de la frecuencia, generando los vectores de frecuencias y magnitudes (normalizadas o en decibelios).
 
@@ -27,11 +29,22 @@ $$
 
 donde \( |S| \) es la magnitud del espectro de la señal.
 
-Todas las representaciones visuales se realizan con Matplotlib, permitiendo interpretar el comportamiento espectral de la señal antes y después del procesamiento.
-
 ## Distorsión 
 La distorsion es un proceso donde, en una señal con amplitud normalizada se busca limitar sus umbrales en un punto fijo, y por medio de una multiplicación (ganancia), esta no tenga mas opción que aplastarse en sus límites.
 
+Librerías: numpy para operaciones matemáticas vectorizadas en todas las funciones de distorsión.
+
+Este efecto sigue un flujo estricto para considerarse una distorsión profesional, cada proceso esta dividido por módulos que procesan la señal deacuerdo a su función:
+```mermaid
+graph TD
+    A[Input Signal] --> B[Pre-Gain (dB)]
+    B --> C[Oversampling (upsample + LPF)]
+    C --> D[Distortion / Soft Clipping / Asymmetry]
+    D --> E[Anti-alias LPF]
+    E --> F[Downsample (decimate)]
+    F --> G[Post-Gain (dB)]
+    G --> H[Output Signal]
+```
 ### Hard-Clipping
 El Hard-Clipping es un tipo de distorsión que recorta los umbrales de la señal en un valor dado. Al aplicar una ganancia a la señal hard-clippeada y con límites, esta se aplasta entre ellos y produce una distorsión de la señal áspera y agresiva.
 
@@ -58,7 +71,7 @@ En el proyecto, se utilizan 3 funciones de transferencia, en las cuales se proce
 Produce una distorsión suave y musical. Limita la señal entre -1 y 1.
 
 $$
-y = \tanh(kx)
+y = \tanh(x)
 $$
 
 
@@ -67,7 +80,7 @@ $$
 Similar a la anterior, pero con una respuesta más progresiva y menos abrupta en la saturación.
 
 $$
-y = \frac{2}{\pi} \arctan(kx)
+y = \frac{2}{\pi} \arctan(x)
 $$
 
 
@@ -75,16 +88,14 @@ $$
 Una alternativa que simula una función con las propiedades de funciones de transferencia.
 
 $$
-y = \frac{x}{1 + |kx|}
+y = \frac{x}{1 + |x|}
 $$
 
 
 En todas estas funciones:
 - \( x \): señal de entrada normalizada.  
-- \( y \): señal de salida procesada. 
-- \( k \): controla la ganancia o intensidad de la distorsión.  
-  Valores altos producen una saturación más pronunciada.
-
+- \( y \): señal de salida procesada.  
+ 
 Estas funciones tienen como principales características esenciales del Soft-Clipping, una respuesta suave y continua, generando una distorsión cálida y amplia armónicamente.
 
 ### Escalabilidad y variaciones asimétricas 
@@ -111,6 +122,8 @@ Este sistema de distorsión también permite modificar el carácter del efecto m
 
 ## Filtrado Pasabanda
 El filtrado Pasabanda se diseña para dejar pasar solo un rango especifico de frecuencias que viven en la señal, atenuando las que se encuentran por encima o debajo de los limites definidos.
+
+Librerías: scipy.signal para diseño e implementación de filtros digitales.
 
 Los parametros son:
 - low_frequency (Hz): frecuencia de corte inferior.
@@ -159,14 +172,44 @@ Esto garantiza que los valores estén en el rango [0,1] requerido por los algori
 Así el comportamiento en la salida las frecuencias dentro de la banda mantienen una amplitud casi constante y las frecuencias fuera de la banda se atenúan progresivamente según el orden del filtro.
 Entre mas se incremente el orden, mayor sera la pendiente de atenuación.
 
+## Efectos de Repetición
+Los efectos de Repetición sobre el tiempo, basan su funcionalidad en guardar la señal de audio y repetirla posteriormente con diferentes alteraciones a los datos de entrada.
+
+### Delay
+El delay guarda la señal de audio en la memoria, y la emplea nuevamente según los datos de la pista de audio proveída y los atributos declarados por el usuario. En este caso, fue trabajado por el paquete Soundfile, y su manejo de la data por medio de arrays de la librería Numpy.
+
+Así, sus parámetros son:
+- seconds: segundos después de los cuales se repite la pista de audio
+- impact: cantidad de veces la cual el efecto es repetido
+- dampening: porcentaje por el cual la señal repetida se debilita
+
+Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que seguir la siguiente tabla (valores con respecto a un BPM de 120), de manera que al repetir la señal, no suene fuera de lugar, sino que contribuya a la pista.
+
+| Note Value |	Notes |	Dotted | Triplets |
+| --- | --- | --- | --- |
+| 1/1 (1 Bar) |	2000 ms / 0.5 Hz | 3000 ms / 0.33 Hz | 1333.33 ms / 0.75 Hz |
+| 1/2 (2 Beats) | 1000 ms / 1 Hz | 1500 ms / 0.67 Hz |	666.67 ms / 1.5 Hz |
+| 1/4 (1 Beat) | 500 ms / 2 Hz |750 ms / 1.33 Hz | 333.33 ms / 3 Hz |
+| 1/8 |	250 ms / 4 Hz |	375 ms / 2.67 Hz |	166.67 ms / 6 Hz |
+| 1/16 | 125 ms / 8 Hz | 187.5 ms / 5.33 Hz |	83.33 ms / 12 Hz |
+| 1/32 | 62.5 ms / 16 Hz |	93.75 ms / 10.67 Hz |	41.67 ms / 24 Hz |
+| 1/64 | 31.25 ms / 32 Hz |	46.88 ms / 21.33 Hz |	20.83 ms / 48 Hz |
+| 1/128 | 15.63 ms / 64 Hz | 23.44 ms / 42.67 Hz |	10.42 ms / 96 Hz |
+| 1/256 | 7.81 ms / 128 Hz | 11.72 ms / 85.33 Hz | 	5.21 ms / 192 Hz |
+| 1/512	| 3.91 ms / 256 Hz | 5.86 ms / 170.67 Hz |	2.6 ms / 384 Hz |
+
+Fuente: [Delay & Reverb Calculator](https://anotherproducer.com/online-tools-for-musicians/delay-reverb-time-calculator)
+
 ## Gestión de gráficas - visualización de señales y efectos
 La visualización se realiza mediante matplotlib, integrando las representaciones en el dominio del tiempo, la FFT y el espectrograma.
 
-- Clase Control: administra la ventana principal e interfaz interactiva.
+Librerías: matplotlib.pyplot para creación de figuras y subplots, matplotlib.widgets para elementos interactivos.
+
+  - Clase Control: administra la ventana principal e interfaz interactiva.
   - Genera los botones que permiten alternar entre la señal original y las procesadas.
   - Invoca los métodos de Graphs según la acción del usuario, permitiendo una visualización dinámica.
 
-- Clase Graphs: gestiona el trazado de las gráficas.
+  - Clase Graphs: gestiona el trazado de las gráficas.
   - Representa la señal en el tiempo, su espectro (FFT) y el espectrograma.
   - Permite comparar versiones filtradas y no filtradas mediante subplots separados y colormaps adecuados.
 
@@ -281,6 +324,27 @@ classDiagram
 	    +apply_asimetric_displacement()
         
     }
+	class RepeatedSignals {
+		+str name
+		#float seconds
+		#int impact
+		+apply()
+	}
+
+	class Delay {
+		+str name
+		#float seconds
+		#int impact
+		#float dampening
+		+apply()
+        +get_seconds()
+        +set_seconds()
+        +get_impact()
+        +set_impact()
+        +get_dampening()
+        +set_dampening()
+	}
+
     class Control {
         +array guitar
         +list efects
@@ -292,23 +356,25 @@ classDiagram
         +show_control_window()
     }
     class Graphs {
-    +array guitar_signal
-    +list effects
-    +str style
-    +graphing()
-    +graphing_fft()
-    +graphing_spectrogram()
-    +show_filtered_graph()
+	    +array guitar_signal
+	    +list effects
+	    +str style
+	    +graphing()
+	    +graphing_fft()
+	    +graphing_spectrogram()
+	    +show_filtered_graph()
     }
 
     WavSignal <.. ProcessorSignal
     ProcessorSignal <|-- PassbandFilter
     ProcessorSignal <|-- Distortion
+	ProcessorSignal <|-- RepeatedSignals
     Distortion <|-- HardClipping
     Distortion <|-- SoftClipping
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
+	RepeatedSignals <|-- Delay
     ProcessorSignal <.. Control
     WavSignal <.. Control
     Graphs *.. Control
