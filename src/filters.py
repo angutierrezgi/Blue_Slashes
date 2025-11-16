@@ -1,5 +1,6 @@
-from scipy.signal import butter, lfilter
+from scipy.signal import butter, lfilter, firwin
 from audio_signal import ProcessorSignal
+import numpy as np
 
 class PassbandFilter(ProcessorSignal):
     
@@ -26,3 +27,26 @@ class PassbandFilter(ProcessorSignal):
         # Here the frequencies outside the limit are attenuated according to the value in dB, limits in -3dB, then they fall according to the order
         signal_filtered = lfilter(b, a, signal)
         return signal_filtered
+    
+class Oversampler(ProcessorSignal):
+    def __init__(self, factor=4, filter_length=101):
+        super().__init__("oversampler")
+        self.factor = factor
+        self.filter_length = filter_length
+        # Design low-pass FIR filter for interpolation/decimation
+        self.lpf = firwin(numtaps=self.filter_length, cutoff=1/self.factor, window="hamming")
+
+    def apply(self, signal):
+        """Upsample the input signal by self.factor, apply low-pass filter to remove images."""
+        # Insert zeros to increase sample rate
+        upsampled = np.zeros(len(signal) * self.factor)
+        upsampled[::self.factor] = signal
+        # Apply low-pass filter to remove imaging
+        filtered = lfilter(self.lpf, 1.0, upsampled)
+        return filtered
+
+    def downsample(self, signal):
+        """Low-pass filter and reduce sample rate by self.factor."""
+        filtered = lfilter(self.lpf, 1.0, signal)
+        downsampled = filtered[::self.factor]
+        return downsampled

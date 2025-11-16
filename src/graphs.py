@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.widgets import Button
 class Graphs:
-    def __init__(self, guitar_signal, effects, style='dark_background'):
+    def __init__(self, signal, effects, style='dark_background'):
         plt.style.use(style)
-        self.guitar_signal = guitar_signal # signal that will be graphed
+        self.signal = signal # signal that will be graphed   
         self.effects = effects
         self.window = plt.figure(figsize=(12,12), edgecolor='black') #creates a window
         self.grid = GridSpec(3, 1, figure=self.window) # assigns to window 2 rows and 1 column
@@ -54,13 +54,13 @@ class Graphs:
         plt.show(block=False)
 
     def show_filtered_graph(self, event):
-        signal_filtered = self.effects['Filter'].apply(self.guitar_signal.data) # applies the filter effect to vector-data
-        times = self.guitar_signal.time() # generates time vector for x-axis
+        signal_filtered = self.effects['Filter'].apply(self.signal.data) # applies the filter effect to vector-data
+        times = self.signal.time() # generates time vector for x-axis
         # graphs the filtered signal
         self.graphing('Filtered Signal', times, signal_filtered, color= "#ff0000")
         # applies FFT and spectrogram to the filtered signal and graphs them
-        frequencies, magnitude = self.guitar_signal.fft(signal_filtered, self.guitar_signal.samplerate)
+        frequencies, magnitude = self.signal.fft(signal_filtered, self.signal.samplerate)
         self.graphing_fft('FFT filtered Signal', frequencies, magnitude, color ="#e05454")
-        frequency, time, spectrum = self.guitar_signal.spectrogram(signal_filtered, self.guitar_signal.samplerate)
+        frequency, time, spectrum = self.signal.spectrogram(signal_filtered, self.signal.samplerate)
         self.graphing_spectrogram('Spectrogram Filtered Signal', time, frequency, spectrum)
    
