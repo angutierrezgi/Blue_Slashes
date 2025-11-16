@@ -50,6 +50,26 @@ class ProcessorSignal:
     
     def apply(self, signal):
         raise NotImplementedError("subclasses have to implement it")
+
+class PreGain(ProcessorSignal):
+
+    def __init__(self, gain_db):
+        super().__init__("pre-gain")
+        self.gain_db = gain_db
+
+    def apply(self, signal):
+        gain = 10 ** (self.gain_db / 20)
+        return signal * gain
+    
+class PostGain(ProcessorSignal):
+
+    def __init__(self, gain_db):
+        super().__init__("post-gain")
+        self.gain_db = gain_db
+
+    def apply(self, signal):
+        gain = 10 ** (self.gain_db / 20)
+        return signal * gain
     
 
     

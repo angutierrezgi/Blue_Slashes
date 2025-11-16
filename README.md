@@ -11,11 +11,13 @@ Una interfaz gráfica interactiva permite observar como cada procesamiento influ
 ## Representacion y procesamiento de la señal .wav
 La clase WavSignal modela una señal de audio en formato .wav, permitiendo su análisis en los dominios del tiempo y la frecuencia mediante operaciones fundamentales.
 
-Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
+Librerías utilizadas: soundfile para lectura/escritura de audio, numpy para operaciones numéricas, scipy.signal para análisis espectral, matplotlib para visualización.
 
-- Normalización: ajusta la amplitud al rango [−1,1], garantizando una escala uniforme para el procesamiento.
+- Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
 
-- Eje temporal: genera un vector de tiempo a partir del número de muestras y la frecuencia de muestreo, facilitando la representación temporal.
+- Normalización: ajusta la amplitud al rango [−1,1], garantizando una escala uniforme para el procesamiento. Implementada con numpy para operaciones vectoriales eficientes.
+
+- Eje temporal: genera un vector de tiempo a partir del número de muestras y la frecuencia de muestreo, facilitando la representación temporal usando numpy.arange.
 
 - Transformada Rápida de Fourier (FFT): implementada con numpy.fft, transforma la señal del dominio temporal al de la frecuencia, generando los vectores de frecuencias y magnitudes (normalizadas o en decibelios).
 
@@ -27,11 +29,22 @@ $$
 
 donde \( |S| \) es la magnitud del espectro de la señal.
 
-Todas las representaciones visuales se realizan con Matplotlib, permitiendo interpretar el comportamiento espectral de la señal antes y después del procesamiento.
-
 ## Distorsión 
 La distorsion es un proceso donde, en una señal con amplitud normalizada se busca limitar sus umbrales en un punto fijo, y por medio de una multiplicación (ganancia), esta no tenga mas opción que aplastarse en sus límites.
 
+Librerías: numpy para operaciones matemáticas vectorizadas en todas las funciones de distorsión.
+
+Este efecto sigue un flujo estricto para considerarse una distorsión profesional, cada proceso esta dividido por módulos que procesan la señal deacuerdo a su función:
+```mermaid
+graph TD
+    A[Input Signal] --> B[Pre-Gain (dB)]
+    B --> C[Oversampling (upsample + LPF)]
+    C --> D[Distortion / Soft Clipping / Asymmetry]
+    D --> E[Anti-alias LPF]
+    E --> F[Downsample (decimate)]
+    F --> G[Post-Gain (dB)]
+    G --> H[Output Signal]
+```
 ### Hard-Clipping
 El Hard-Clipping es un tipo de distorsión que recorta los umbrales de la señal en un valor dado. Al aplicar una ganancia a la señal hard-clippeada y con límites, esta se aplasta entre ellos y produce una distorsión de la señal áspera y agresiva.
 
@@ -58,7 +71,7 @@ En el proyecto, se utilizan 3 funciones de transferencia, en las cuales se proce
 Produce una distorsión suave y musical. Limita la señal entre -1 y 1.
 
 $$
-y = \tanh(kx)
+y = \tanh(x)
 $$
 
 
@@ -67,7 +80,7 @@ $$
 Similar a la anterior, pero con una respuesta más progresiva y menos abrupta en la saturación.
 
 $$
-y = \frac{2}{\pi} \arctan(kx)
+y = \frac{2}{\pi} \arctan(x)
 $$
 
 
@@ -75,16 +88,14 @@ $$
 Una alternativa que simula una función con las propiedades de funciones de transferencia.
 
 $$
-y = \frac{x}{1 + |kx|}
+y = \frac{x}{1 + |x|}
 $$
 
 
 En todas estas funciones:
 - \( x \): señal de entrada normalizada.  
-- \( y \): señal de salida procesada. 
-- \( k \): controla la ganancia o intensidad de la distorsión.  
-  Valores altos producen una saturación más pronunciada.
-
+- \( y \): señal de salida procesada.  
+ 
 Estas funciones tienen como principales características esenciales del Soft-Clipping, una respuesta suave y continua, generando una distorsión cálida y amplia armónicamente.
 
 ### Escalabilidad y variaciones asimétricas 
@@ -111,6 +122,8 @@ Este sistema de distorsión también permite modificar el carácter del efecto m
 
 ## Filtrado Pasabanda
 El filtrado Pasabanda se diseña para dejar pasar solo un rango especifico de frecuencias que viven en la señal, atenuando las que se encuentran por encima o debajo de los limites definidos.
+
+Librerías: scipy.signal para diseño e implementación de filtros digitales.
 
 Los parametros son:
 - low_frequency (Hz): frecuencia de corte inferior.
@@ -190,11 +203,13 @@ Fuente: [Delay & Reverb Calculator](https://anotherproducer.com/online-tools-for
 ## Gestión de gráficas - visualización de señales y efectos
 La visualización se realiza mediante matplotlib, integrando las representaciones en el dominio del tiempo, la FFT y el espectrograma.
 
-- Clase Control: administra la ventana principal e interfaz interactiva.
+Librerías: matplotlib.pyplot para creación de figuras y subplots, matplotlib.widgets para elementos interactivos.
+
+  - Clase Control: administra la ventana principal e interfaz interactiva.
   - Genera los botones que permiten alternar entre la señal original y las procesadas.
   - Invoca los métodos de Graphs según la acción del usuario, permitiendo una visualización dinámica.
 
-- Clase Graphs: gestiona el trazado de las gráficas.
+  - Clase Graphs: gestiona el trazado de las gráficas.
   - Representa la señal en el tiempo, su espectro (FFT) y el espectrograma.
   - Permite comparar versiones filtradas y no filtradas mediante subplots separados y colormaps adecuados.
 

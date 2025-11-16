@@ -3,9 +3,10 @@ from matplotlib.widgets import Button
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from graphs import Graphs
+from audio_signal import WavSignal
 
 class Control:
-    def __init__(self, guitar, effects,style='dark_background'):
+    def __init__(self, guitar, effects, style='dark_background'):
         plt.style.use(style) # assigns a style to the plots
         self.guitar = guitar
         self.effects = effects
@@ -36,64 +37,79 @@ class Control:
         self.botton_algebraic.on_clicked(self.show_algebraic_graph)
     
     def show_original_signal_graph(self, event): 
-        self.graphs = Graphs(self.guitar, self.effects)
-        time = self.guitar.time()
-        self.graphs.graphing('Original Signal', time, self.guitar.data, color='cyan')
-        frequencies, magnitude = self.guitar.fft(self.guitar.data, self.guitar.samplerate)
+        original = WavSignal(self.guitar.data, self.guitar.samplerate)
+        self.graphs = Graphs(original, self.effects)
+        time = original.time()
+        self.graphs.graphing('Original Signal', time, original.data, color='cyan')
+        frequencies, magnitude = original.fft(original.data, original.samplerate)
         self.graphs.graphing_fft('FFT signal', frequencies, magnitude, color='red')
-        frequency, time, spectrum = self.guitar.spectrogram(self.guitar.data, self.guitar.samplerate)
+        frequency, time, spectrum = original.spectrogram(original.data, original.samplerate)
         self.graphs.graphing_spectrogram('Spectrogram', time, frequency, spectrum)
     
     def show_hard_graph(self, event):
         
         # takes since prueba_wav.py the effect "Hard" and applies it to the guitar signal data
         signal_hard = self.effects['Hard'].apply(self.guitar.data)
-        # generates the time array for the x-axis of the graph
-        time = self.guitar.time()
-        # creates an instance of the Graphs class
-        self.graphs = Graphs(self.guitar, self.effects)
-        # graphs the hard clipping signal and the filtered hard clipping signal
-        self.graphs.graphing('hard Clipping', time, signal_hard, color= "#ff0000")
         
-        frequencies, magnitude = self.guitar.fft(signal_hard, self.guitar.samplerate)
+        # envolvate the signal in WavSignal
+        signal_hard_wav = WavSignal(signal_hard, self.guitar.samplerate)
+        # generates the time array for the x-axis of the graph
+        time = signal_hard_wav.time()
+        # creates an instance of the Graphs class
+        self.graphs = Graphs(signal_hard_wav, self.effects)
+        # graphs the hard clipping signal and the filtered hard clipping signal
+        self.graphs.graphing('hard Clipping', time, signal_hard_wav.data, color= "#ff0000")
+
+        frequencies, magnitude = signal_hard_wav.fft(signal_hard_wav.data, signal_hard_wav.samplerate)
         self.graphs.graphing_fft('FFT HardClippling-Signal', frequencies, magnitude, color='red')
+        frequency, time, spectrum = signal_hard_wav.spectrogram(signal_hard_wav.data, signal_hard_wav.samplerate)
+        self.graphs.graphing_spectrogram('Spectrogram', time, frequency, spectrum)
         
     def show_tanh_graph(self, event):
         # takes since prueba_wav.py the effect "Tanh" and applies it to the guitar signal data
         signal_tanh = self.effects['Tanh'].apply(self.guitar.data)
-        time = self.guitar.time()
         
-        self.graphs = Graphs(self.guitar, self.effects)
-        
+        signal_tanh_wav = WavSignal(signal_tanh, self.guitar.samplerate)
+        time = signal_tanh_wav.time()
+
+        self.graphs = Graphs(signal_tanh_wav, self.effects)
+
         # graphs the tanh clipping signal
-        self.graphs.graphing('Tanh Clipping', time, signal_tanh, color="#ff00d0")
-        frequencies, magnitude = self.guitar.fft(signal_tanh, self.guitar.samplerate)
+        self.graphs.graphing('Tanh Clipping', time, signal_tanh_wav.data, color="#ff00d0")
+        frequencies, magnitude = signal_tanh_wav.fft(signal_tanh_wav.data, signal_tanh_wav.samplerate)
         self.graphs.graphing_fft('Tanh Clipping FFT', frequencies, magnitude, color='red')
+        frequency, time, spectrum = signal_tanh_wav.spectrogram(signal_tanh_wav.data, signal_tanh_wav.samplerate)
+        self.graphs.graphing_spectrogram('Spectrogram', time, frequency, spectrum)
         
     def show_atan_graph(self, event):
         # takes since prueba_wav.py the effect "Atan" and applies it to the guitar signal data
-        signal_tanh = self.effects['Atan'].apply(self.guitar.data)
-        time = self.guitar.time()
-        # takes since prueba_wav.py the effect "Filter" and applies it to the processed signal
-        signal_tanh_filtered = self.effects['Filter'].apply(signal_tanh)
+        signal_atan = self.effects['Atan'].apply(self.guitar.data)
 
-        self.graphs = Graphs(self.guitar, self.effects)
+        signal_atan_wav = WavSignal(signal_atan, self.guitar.samplerate)
+        time = signal_atan_wav.time()
+
+        self.graphs = Graphs(signal_atan_wav, self.effects)
         # graphs the atan clipping signal and the filtered atan clipping signal
-        self.graphs.graphing('Atan Clipping', time, signal_tanh, color="#51FF00")
-        self.graphs.graphing_filtered('Atan Clipping', time, signal_tanh_filtered, color="#06FF76")
-        
+        self.graphs.graphing('Atan Clipping', time, signal_atan_wav.data, color="#51FF00")
+        frequencies, magnitude = signal_atan_wav.fft(signal_atan_wav.data, signal_atan_wav.samplerate)
+        self.graphs.graphing_fft('Atan Clipping FFT', frequencies, magnitude, color='red')
+        frequency, time, spectrum = signal_atan_wav.spectrogram(signal_atan_wav.data, signal_atan_wav.samplerate)
+        self.graphs.graphing_spectrogram('Spectrogram', time, frequency, spectrum)
+
     def show_algebraic_graph(self, event):
         # takes since prueba_wav.py the effect "Algebraic" and applies it to the guitar signal data
         signal_algebraic = self.effects['Algebraic'].apply(self.guitar.data)
-        time = self.guitar.time()
-        # takes since prueba_wav.py the effect "Filter" and applies it to the processed signal
-        signal_algebraic_filtered = self.effects['Filter'].apply(signal_algebraic)
 
-        self.graphs = Graphs(self.guitar, self.effects)
+        signal_algebraic_wav = WavSignal(signal_algebraic, self.guitar.samplerate)
+        time = signal_algebraic_wav.time()
+        self.graphs = Graphs(signal_algebraic_wav, self.effects)
         # graphs the algebraic clipping signal and the filtered algebraic clipping signal
-        self.graphs.graphing('Algebraic', time, signal_algebraic, color="#006086")   
-        self.graphs.graphing_filtered('filtered Algebraic', time, signal_algebraic_filtered, color="#00ffcc")
-        
+        self.graphs.graphing('Algebraic', time, signal_algebraic_wav.data, color="#006086")
+        frequencies, magnitude = signal_algebraic_wav.fft(signal_algebraic_wav.data, signal_algebraic_wav.samplerate)
+        self.graphs.graphing_fft('Algebraic Clipping FFT', frequencies, magnitude, color='red')
+        frequency, time, spectrum = signal_algebraic_wav.spectrogram(signal_algebraic_wav.data, signal_algebraic_wav.samplerate)
+        self.graphs.graphing_spectrogram('Spectrogram', time, frequency, spectrum)
+
     # shows the control window with all its components
     def show_control_window(self):
         plt.show(block=True)    
