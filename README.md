@@ -24,7 +24,7 @@ Librerías utilizadas: soundfile para lectura/escritura de audio, numpy para ope
 - Espectrograma: calculado con scipy.signal.spectrogram, muestra la distribución de energía en el tiempo y la frecuencia. Se representa en decibelios (dB) mediante:
   
 $$
-S_{dB}(f, t) = 10 \log_{10} (|S(f, t)|^2 + \epsilon)
+S_{dB}(f, t) = 20 \log_{10} (|S(f, t)|^2 + \epsilon)
 $$
 
 donde \( |S| \) es la magnitud del espectro de la señal.
@@ -37,16 +37,31 @@ Librerías: numpy para operaciones matemáticas vectorizadas en todas las funcio
 Este efecto sigue un flujo estricto para considerarse una distorsión profesional, cada proceso esta dividido por módulos que procesan la señal deacuerdo a su función:
 ```mermaid
 graph TD
-    A[Input Signal] --> B[Pre-Gain (dB)]
-    B --> C[Oversampling (upsample + LPF)]
-    C --> D[Distortion / Soft Clipping / Asymmetry]
-    D --> E[Anti-alias LPF]
-    E --> F[Downsample (decimate)]
-    F --> G[Post-Gain (dB)]
-    G --> H[Output Signal]
+    A[Input Signal] --> B[Pre-Gain dB]
+    B --> C[Oversampling]
+    C --> D[Distortion Module]
+    D --> D1[Hard Clipping]
+    D --> D2[Soft Clipping]
+    D1 --> E[Asymmetric]
+    D2 --> E
+    E --> F[Anti-alias LPF]
+    F --> G[Downsample]
+    G --> H[Post-Gain dB]
+    H --> I[Output Signal]
 ```
+### Pre-Gain
+Antes de procesar la señal normalizada por el Clipping, se multiplica ese vector de muestreo, por un factor, que dado un valor lineal, se convierte a uno en escala logaritmica (dB):
+
+\[
+\text{A} = 10^{\frac{\text{gain}_{\text{dB}}}{20}}
+\]
+Donde:
+$A$ = factor de amplitud lineal
+$dB$ = ganancia en decibelios
+
 ### Hard-Clipping
-El Hard-Clipping es un tipo de distorsión que recorta los umbrales de la señal en un valor dado. Al aplicar una ganancia a la señal hard-clippeada y con límites, esta se aplasta entre ellos y produce una distorsión de la señal áspera y agresiva.
+El Hard-Clipping es un tipo de distorsión que recorta los umbrales de la señal en un valor dado.  
+La señal con una ganancia anterior y con límites, se aplasta entre ellos y produce una distorsión de la señal áspera y agresiva.
 
 $$ 
 y =
