@@ -13,7 +13,7 @@ La clase WavSignal modela una señal de audio en formato .wav, permitiendo su an
 
 Librerías utilizadas: soundfile para lectura/escritura de audio, numpy para operaciones numéricas, scipy.signal para análisis espectral, matplotlib para visualización.
 
-- Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
+- Lectura del archivo: utiliza soundfile para obtener los datos de amplitud y la frecuencia de muestreo en tipo de dato array y float respectivamente. Si el archivo es estéreo, se convierte a mono para simplificar el análisis.
 
 - Normalización: ajusta la amplitud al rango [−1,1], garantizando una escala uniforme para el procesamiento. Implementada con numpy para operaciones vectoriales eficientes.
 
@@ -59,6 +59,7 @@ $$
 Donde:
 
 $A$ = factor de amplitud lineal
+
 $dB$ = ganancia en decibelios
 
 ### Oversampling - Antialias - Downsampling
@@ -68,6 +69,7 @@ Suponiendo un vector de muestras original:
 $$
 \mathbf{x} = [\, x_0,\; x_1,\; x_2,\; x_3 \,]
 $$
+
 Vector con upsampling:
 
 $$
@@ -96,12 +98,13 @@ H(\omega) \approx 0 \quad \text{para } |\omega| > \omega_c
 $$
 
 H(ω) es la respuesta en frecuencia del filtro, donde el cutoff normalizado se fija como:
+
 $$
 \omega_c = \frac{1}{L}
 $$
 
 Luego del proceso anterior, la señal que resulta pasa por un clipping, generando nuevas frecuencias múltiplos de las existentes, por ello, se aplica nuevamente el filtro anterior FIR a ese vector clipeado.
-En ese momento, se aplica downsampling, que consiste en devolver el sample rate a su tamaño original, descartando dependiendo el L inicial:
+En ese momento, se aplica downsampling, que consiste en devolver el sample rate a su tamaño original, descartando muestras dependiendo el L inicial:
 Vector clippeado:
 
 $$
