@@ -24,7 +24,7 @@ Librerías utilizadas: soundfile para lectura/escritura de audio, numpy para ope
 - Espectrograma: calculado con scipy.signal.spectrogram, muestra la distribución de energía en el tiempo y la frecuencia. Se representa en decibelios (dB) mediante:
   
 $$
-S_{dB}(f, t) = 20 \log_{10} (|S(f, t)|^2 + \epsilon)
+S_{dB}(f, t) = 20 \log_{10} (|S(f, t)| + \epsilon)
 $$
 
 donde \( |S| \) es la magnitud del espectro de la señal.
@@ -52,12 +52,61 @@ graph TD
 ### Pre-Gain
 Antes de procesar la señal normalizada por el Clipping, se multiplica ese vector de muestreo, por un factor, que dado un valor lineal, se convierte a uno en escala logaritmica (dB):
 
-\[
-\text{A} = 10^{\frac{\text{gain}_{\text{dB}}}{20}}
-\]
+$$
+A = 10^{\frac{\text{gain}_{\text{dB}}}{20}}
+$$
+
 Donde:
+
 $A$ = factor de amplitud lineal
 $dB$ = ganancia en decibelios
+
+### Oversampling - Antialias - Downsampling
+En este proceso se aumenta artificialmente la frecuencia de muestreo de la señal digital por un factor L (upsampling). Este factor inserta L-1 ceros entre cada muestra original.
+Suponiendo un vector de muestras original:
+$$
+\mathbf{x} = [\, x_0,\; x_1,\; x_2,\; x_3 \,]
+$$
+Vector con upsampling:
+$$
+\mathbf{x}_{\uparrow 4}
+= [\, x_0,\; 0,\; 0,\; 0,\; x_1,\; 0,\; 0,\; 0,\; x_2,\; 0,\; 0,\; 0,\; x_3 \,]
+$$
+Luego de insertar los ceros, se generan imágenenes espectrales en los múltiplos de la frecuencia original de muestreo, para eliminarlas, se aplica un filtro pasa-bajos con cutoff = Nyquist.
+
+Librerias: scipy.signal y sus funciones firwin() y lfilter.
+firwin() genera un vector de coeficientes h[k], del muestreo con upsampling, con tamaño M y cutoff = 1/L.
+lfilter() aplica una convolucion en el dominio del tiempo al vector con upsampling usando los coeficientes de h[k]:
+$$
+y[n] = \sum_{k=0}^{M-1} h[k]\, x[n-k]
+$$
+
+Los coeficientes h[k] se diseñan para que:
+$$
+H(\omega) \approx 1 \quad \text{para } |\omega| < \omega_c
+$$
+
+$$
+H(\omega) \approx 0 \quad \text{para } |\omega| > \omega_c
+$$
+
+H(ω) es la respuesta en frecuencia del filtro, donde el cutoff normalizado se fija como:
+$$
+\omega_c = \frac{1}{L}
+$$
+
+Luego del proceso anterior, la señal que resulta pasa por un clipping, generando nuevas frecuencias múltiplos de las existentes, por ello, se aplica nuevamente el filtro anterior FIR a ese vector clipeado.
+En ese momento, se aplica downsampling, que consiste en devolver el sample rate a su tamaño original, descartando dependiendo el L inicial:
+Vector clippeado:
+$$
+\mathbf{x} = [\, x_0,\; x_1,\; x_2,\; x_3,\; x_4,\; x_5,\; x_6,\; x_7 \,]
+$$
+Vector downsampled con L=4:
+
+$$
+\mathbf{x}_{\downarrow 4}
+= [\, x_0,\; x_4 \,]
+$$
 
 ### Hard-Clipping
 El Hard-Clipping es un tipo de distorsión que recorta los umbrales de la señal en un valor dado.  
@@ -113,9 +162,7 @@ En todas estas funciones:
  
 Estas funciones tienen como principales características esenciales del Soft-Clipping, una respuesta suave y continua, generando una distorsión cálida y amplia armónicamente.
 
-### Escalabilidad y variaciones asimétricas 
-El código se diseño para que además de modelar simplemente un efecto sonoro, permitiera tener un control experimental sobre este de la más alta escalabilidad, diferenciándolo de pedaleras con un solo tipo de distorsión y parámetros limitados.
-
+### Variaciones asimétricas 
 Este sistema de distorsión también permite modificar el carácter del efecto mediante la aplicación de asimetrías al Hard-clipping y a las funciones de transferencia. Romper esta simetría en la señal generas componentes armónicos pares y como resultado un sónido mas suave y orgánico.
 
 #### Tipos de Asimetrías implementadas
@@ -123,17 +170,17 @@ Este sistema de distorsión también permite modificar el carácter del efecto m
   Aplica la misma ganancia en ambos lados de la señal. Suena mas agresivo, pero artificial.
   
   
-  $y = \tanh(x \cdot g)$
+  $y = \tanh(x)$
 
 - Recorte asimétrico:
   Recorta la señal de manera desigual: el límite positivo y el límite negativo son distintos. Sonido orgánico y cálido.
   
-  $y = \tanh(\text{clip}(x \cdot g, L_{neg}, L_{pos}))$
+  $y = \tanh(\text{clip}(x, L_{neg}, L_{pos}))$
 
 - Asimetría por desplazamiento:
   Desplaza toda la señal hacia arriba o abajo antes de aplicar la función no lineal. Suave, valvular y mas natural.
    
-  $y = \tanh((x + o) \cdot g)$
+  $y = \tanh((x + o))$
 
 ## Filtrado Pasabanda
 El filtrado Pasabanda se diseña para dejar pasar solo un rango especifico de frecuencias que viven en la señal, atenuando las que se encuentran por encima o debajo de los limites definidos.
