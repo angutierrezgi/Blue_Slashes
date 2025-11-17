@@ -34,20 +34,25 @@ class Oversampler(ProcessorSignal):
         super().__init__("oversampler")
         self.factor = factor
         self.filter_length = filter_length
-        # Design low-pass FIR filter for interpolation/decimation
-        self.lpf = firwin(numtaps=self.filter_length, cutoff=1/self.factor, window="hamming")
 
-    def apply(self, signal):
-        """Upsample the input signal by self.factor, apply low-pass filter to remove images."""
-        # Insert zeros to increase sample rate
-        upsampled = np.zeros(len(signal) * self.factor)
-        upsampled[::self.factor] = signal
-        # Apply low-pass filter to remove imaging
-        filtered = lfilter(self.lpf, 1.0, upsampled)
-        return filtered
+        # Same low-pass FIR filter is used for both anti-imaging (after upsampling)
+        # and anti-aliasing (before downsampling).
+        self.lpf = firwin(numtaps=self.filter_length,
+            cutoff=1/self.factor,     # Normalized cutoff = 1/L
+            window="hamming"
+        )
+
+    def upsample(self, signal):
+        # Zero-insertion upsampling by factor L
+        up = np.zeros(len(signal) * self.factor)
+        up[::self.factor] = signal
+
+        # Apply low-pass filter to remove imaging components
+        return lfilter(self.lpf, 1.0, up)
 
     def downsample(self, signal):
-        """Low-pass filter and reduce sample rate by self.factor."""
+        # Low-pass filter to prevent aliasing before decimation
         filtered = lfilter(self.lpf, 1.0, signal)
-        downsampled = filtered[::self.factor]
-        return downsampled
+
+        # Take one sample every L samples
+        return filtered[::self.factor]
