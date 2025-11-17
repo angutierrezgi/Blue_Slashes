@@ -64,24 +64,29 @@ $dB$ = ganancia en decibelios
 ### Oversampling - Antialias - Downsampling
 En este proceso se aumenta artificialmente la frecuencia de muestreo de la señal digital por un factor L (upsampling). Este factor inserta L-1 ceros entre cada muestra original.
 Suponiendo un vector de muestras original:
+
 $$
 \mathbf{x} = [\, x_0,\; x_1,\; x_2,\; x_3 \,]
 $$
 Vector con upsampling:
+
 $$
 \mathbf{x}_{\uparrow 4}
 = [\, x_0,\; 0,\; 0,\; 0,\; x_1,\; 0,\; 0,\; 0,\; x_2,\; 0,\; 0,\; 0,\; x_3 \,]
 $$
+
 Luego de insertar los ceros, se generan imágenenes espectrales en los múltiplos de la frecuencia original de muestreo, para eliminarlas, se aplica un filtro pasa-bajos con cutoff = Nyquist.
 
 Librerias: scipy.signal y sus funciones firwin() y lfilter.
 firwin() genera un vector de coeficientes h[k], del muestreo con upsampling, con tamaño M y cutoff = 1/L.
 lfilter() aplica una convolucion en el dominio del tiempo al vector con upsampling usando los coeficientes de h[k]:
+
 $$
 y[n] = \sum_{k=0}^{M-1} h[k]\, x[n-k]
 $$
 
 Los coeficientes h[k] se diseñan para que:
+
 $$
 H(\omega) \approx 1 \quad \text{para } |\omega| < \omega_c
 $$
@@ -98,9 +103,11 @@ $$
 Luego del proceso anterior, la señal que resulta pasa por un clipping, generando nuevas frecuencias múltiplos de las existentes, por ello, se aplica nuevamente el filtro anterior FIR a ese vector clipeado.
 En ese momento, se aplica downsampling, que consiste en devolver el sample rate a su tamaño original, descartando dependiendo el L inicial:
 Vector clippeado:
+
 $$
 \mathbf{x} = [\, x_0,\; x_1,\; x_2,\; x_3,\; x_4,\; x_5,\; x_6,\; x_7 \,]
 $$
+
 Vector downsampled con L=4:
 
 $$
