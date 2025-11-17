@@ -1,11 +1,100 @@
+
 import soundfile as sf
 from control import Control
 from audio_signal import WavSignal
 from distortion import HardClipping, Softclipping, TanhClipping, AtanClipping, AlgebraicClipping
-from filters import PassbandFilter
+from filters import PassbandFilter, Oversampler
 from graphs import Graphs
 from repeated_signals import Delay
+from audio_signal import PreGain, PostGain
+def process_audio_chain(
+        wav_path="../Rock_Guitar.wav",
+        pregain_db=20,
+        use_oversampling=True,
+        os_factor=4,
+        umbral=0.6,
+        clip_mode="simetric",
+        clip_offset=0.0,
+        clip_variation=0.0,
+        passband_on=True,
+        low_freq=1000,
+        high_freq=2000,
+        postgain_db=7,
+        save_output=True,
+        output_path="processed_hard.wav"
+  ):
+        # read WAV file
+        wav = WavSignal.archive(wav_path)
+        signal = wav.data
+        fs = wav.samplerate
+    
+        # Pre-Gain
+        pregain = PreGain(pregain_db)
+        signal = pregain.apply(signal)
 
+        # Oversampling 
+        if use_oversampling:
+            os = Oversampler(factor=os_factor)
+            signal = os.upsample(signal)
+
+        # Clipping / Distorsión
+        effects = {
+            "Tanh": TanhClipping(
+                offset=clip_offset,
+                variation=clip_variation,
+                mode=clip_mode
+            ),
+            "Atan": AtanClipping(
+                offset=clip_offset,
+                variation=clip_variation,
+                mode=clip_mode
+            ),
+            "Algebraic": AlgebraicClipping(
+                offset=clip_offset,
+                variation=clip_variation,
+                mode=clip_mode
+            ),
+            "Hard": HardClipping(umbral=umbral,
+                offset=clip_offset,
+                variation=clip_variation,
+                mode=clip_mode
+            )
+    }
+        select = ["Tanh", "Atan", "Algebraic", "Hard"]
+        index = 3  # Choose the desired effect index here
+        clip = effects[select[index]]
+    
+        # select clipping method
+        if clip_mode == "simetric":
+            signal = clip.apply_simetric(signal)
+        elif clip_mode == "cutting":
+            signal = clip.apply_cutting_asimetric(signal)
+        elif clip_mode == "offset":
+            signal = clip.apply_asimetric_displacement(signal)
+
+        # Anti-alias + Downsample 
+        if use_oversampling:
+            signal = os.downsample(signal)
+
+ 
+        # Band-pass filter
+        if passband_on:
+            bandpass = PassbandFilter(
+                low_frequency=low_freq,
+                high_frequency=high_freq,
+                sampling_frequency=fs
+            )
+            signal = bandpass.apply(signal)
+
+        #  Post-Gain
+        postgain = PostGain(postgain_db)
+        signal = postgain.apply(signal)
+
+        # Guardar WAV
+        if save_output:
+            sf.write(output_path, signal, fs)
+
+        return signal    
 def main():
     guitar = WavSignal.archive('../Guitar G minor 170bpm.wav')
     guitar.normalize()
@@ -20,7 +109,7 @@ def main():
     atan_clipped_cut.set_variation(5.0)
     atan_clipped_cut.set_offset(0.0)
   
-
+    
 
     algebraic_clipped = AlgebraicClipping(7.0)
 
@@ -36,17 +125,8 @@ def main():
 
     
     control = Control(guitar, effects) 
-    
-    
     control.show_control_window()
-    sf.write('guitarra_original_filtered.wav', filtered.apply(guitar.data), guitar.samplerate)
-    sf.write('guitarra_attanclipped_cut_filtered.wav', filtered.apply(atan_clipped_cut.apply(guitar.data)), guitar.samplerate)
-    sf.write('guitarra_atanclipped.wav', atan_clipped.apply(guitar.data), guitar.samplerate)
-    sf.write('guitarra_atanclipped_cut.wav', atan_clipped_cut.apply(guitar.data), guitar.samplerate)
-    sf.write('guitarra_filtered.wav', filtered.apply(atan_clipped.apply(guitar.data)), guitar.samplerate)
-    sf.write('guitarra_delay.wav',delay_effect.apply(guitar), guitar.samplerate)
-    sf.write('guitarra_hardclipped.wav', hard_clipped.apply(guitar.data), guitar.samplerate)
-    sf.write('guitarra_hardclipped_filtered.wav', filtered.apply(hard_clipped.apply(guitar.data)), guitar.samplerate)  
-    
+       
+
 if __name__ == "__main__":
-    main()
+    main() 
