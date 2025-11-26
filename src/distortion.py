@@ -72,7 +72,7 @@ class HardClipping(Distortion):
     
     # simetric hard clipping, limits between -umbral and +umbral
     def apply_simetric(self, signal):
-        return np.clip(signal, -self._umbral, self._umbral)
+        return np.clip(np.asarray(signal, dtype = float), -self._umbral, self._umbral)
     
     # asymetric hard clipping by cutting, limits modified by variation, regardless of the thresholds already given
     def apply_cutting_asimetric(self, signal):
@@ -82,13 +82,13 @@ class HardClipping(Distortion):
         elif self._variation < 0:
             positive_limit = self._umbral + self._variation    
             negative_limit = -self._umbral
-        return np.clip(signal, negative_limit, positive_limit)
-    
+        return np.clip(np.asarray(signal, dtype=float), negative_limit, positive_limit)
+
     # asymetric hard clipping by displacement, limits remain the same but the signal is displaced by offset
     def apply_asimetric_displacement(self, signal):
         signal_offset = self._offset + signal
-        return np.clip(signal_offset, -self._umbral, self._umbral)
-            
+        return np.clip(np.asarray(signal_offset, dtype=float), -self._umbral, self._umbral)
+
         
         
 # type of distortion: signal proccesed by specific functions
@@ -107,30 +107,30 @@ class TanhClipping(Softclipping):
         super().__init__("Soft Clipping (tanh)", umbral, variation, offset, mode)
 
     def apply_simetric(self, signal):
-        return np.tanh(signal)
+        return np.tanh(np.asarray(signal, dtype=float))
 
     def apply_cutting_asimetric(self, signal):
         negative_limit, positive_limit = self._limit_asimetrics_cuts()
-        return  np.tanh(np.clip(signal, negative_limit, positive_limit))
+        return  np.tanh(np.clip(np.asarray(signal, dtype=float), negative_limit, positive_limit))
 
     def apply_asimetric_displacement(self, signal):
         signal_offset = self._offset + signal
-        return np.tanh(signal_offset)
+        return np.tanh(np.asarray(signal_offset, dtype=float))
 # type of soft clipping: signal proccesed by Atan function    
 class AtanClipping(Softclipping):
     def __init__(self, umbral= 1.0, variation = 0.0, offset = 0.0, mode = "simetric"):
         super().__init__("Clipping Suave (atan)", umbral, variation, offset, mode)
 
     def apply_simetric(self, signal):
-        return (2/np.pi) * np.arctan(signal)
+        return (2/np.pi) * np.arctan(np.asarray(signal, dtype=float))
 
     def apply_cutting_asimetric(self, signal):
         negative_limit, positive_limit = self._limit_asimetrics_cuts()
-        return  (2/np.pi) * np.arctan(np.clip(signal, negative_limit, positive_limit))
+        return  (2/np.pi) * np.arctan(np.clip(np.asarray(signal, dtype=float), negative_limit, positive_limit))
 
     def apply_asimetric_displacement(self, signal):
         signal_offset = self._offset + signal
-        return (2/np.pi) * np.arctan(signal_offset)
+        return (2/np.pi) * np.arctan(np.asarray(signal_offset, dtype=float))
 
 # type of soft clipping: signal proccesed by algebraic function   
 class AlgebraicClipping(Softclipping):
@@ -138,13 +138,13 @@ class AlgebraicClipping(Softclipping):
         super().__init__("Clipping Suave(algebraico)", umbral, variation, offset, mode)
 
     def apply_simetric(self, signal):
-        return signal / (1 + np.abs(signal))
+        return np.asarray(signal, dtype=float) / (1 + np.abs(np.asarray(signal, dtype=float)))
 
     def apply_cutting_asimetric(self, signal):
         negative_limit, positive_limit = self._limit_asimetrics_cuts()
-        clip_signal = np.clip(signal, negative_limit, positive_limit)
+        clip_signal = np.clip(np.asarray(signal, dtype=float), negative_limit, positive_limit)
         return  clip_signal / (1 + np.abs(clip_signal))
 
     def apply_asimetric_displacement(self, signal):
         signal_offset = self._offset + signal
-        return signal_offset / (1 + np.abs(signal_offset))
+        return np.asarray(signal_offset, dtype=float) / (1 + np.abs(np.asarray(signal_offset, dtype=float)))

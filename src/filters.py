@@ -3,7 +3,7 @@ from audio_signal import ProcessorSignal
 import numpy as np
 
 class PassbandFilter(ProcessorSignal):
-    
+
     def __init__(self, low_frequency = 400.0, high_frequency = 4000.0, sampling_frequency = 44100, order=2):
         super().__init__("band pass filter")
         # Cutoff frequencies in Hz
@@ -16,6 +16,7 @@ class PassbandFilter(ProcessorSignal):
 
     def apply(self, signal):
         # Normalize cutoff frequencies by Nyquist frequency (fs/2), between 0 and 1
+        signal = np.asarray(signal, dtype=float) # ensure signal is float array
         nyquist = 0.5 * self.sampling_frequency
         low = self.low_frequency / nyquist 
         high = self.high_frequency / nyquist 
@@ -26,7 +27,7 @@ class PassbandFilter(ProcessorSignal):
         # applies the filter with the coefficient values ​​at the respective frequency to the signal
         # Here the frequencies outside the limit are attenuated according to the value in dB, limits in -3dB, then they fall according to the order
         signal_filtered = lfilter(b, a, signal)
-        return signal_filtered
+        return np.asarray(signal_filtered, dtype=float)
 
 # oversampler class that increases the sample rate of the signal by a given factor, for better non-lineal processing 
 class Oversampler(ProcessorSignal):
@@ -44,15 +45,17 @@ class Oversampler(ProcessorSignal):
 
     def upsample(self, signal):
         # Zero-insertion upsampling by factor L
-        up = np.zeros(len(signal) * self.factor)
-        up[::self.factor] = signal
-
+        x = np.asarray(signal, dtype=float)
+        up = np.zeros(len(x) * self.factor)
+        up[::self.factor] = x
+        filter = lfilter(self.lpf, 1.0, up)
         # Apply low-pass filter to remove imaging components
-        return lfilter(self.lpf, 1.0, up)
+        return np.asarray(filter, dtype=float)
 
     def downsample(self, signal):
+        x = np.asarray(signal, dtype=float)
         # Low-pass filter to prevent aliasing before decimation
-        filtered = lfilter(self.lpf, 1.0, signal)
-
+        filtered = lfilter(self.lpf, 1.0, x)
+        y = filtered[::self.factor]
         # Take one sample every L samples
-        return filtered[::self.factor]
+        return np.asarray(y, dtype=float)
