@@ -7,7 +7,8 @@ from filters import PassbandFilter, Oversampler
 from graphs import Graphs
 from repeated_signals import Delay
 from audio_signal import PreGain, PostGain  
-    
+from bitcrusher import BitCrusher  # <-- NUEVO
+   
 def main():
     pregain = PreGain()
     oversampler = Oversampler()
@@ -18,6 +19,7 @@ def main():
     delay_effect = Delay(0.73, 0.176, 4)
     passband = PassbandFilter(500, 2000, 44100, order=4)
     postgain = PostGain()
+    bitcrusher = BitCrusher(bit_depth=4, downsample_factor=8, mix=1.0)
     
     effects = {'Hard': hard_clipped ,
                'Tanh': tanh_clipped ,
@@ -27,7 +29,8 @@ def main():
                'Delay': delay_effect,
                'Oversampler': oversampler,
                'PreGain': pregain,
-               'PostGain': postgain}
+               'PostGain': postgain,
+               'BitCrusher': bitcrusher}
 
     control = Control(effects) 
     control.show_control_window()

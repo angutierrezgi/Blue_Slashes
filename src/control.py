@@ -27,6 +27,7 @@ class Control:
         ax_tanh  = self.control.add_axes([0.82, 0.11, 0.16, 0.08])
         ax_atan  = self.control.add_axes([0.82, 0.20, 0.16, 0.08])
         ax_alg   = self.control.add_axes([0.82, 0.29, 0.16, 0.08])
+        ax_bitcrusher = self.control.add_axes([0.82, 0.38, 0.16, 0.08])  # <-- NUEVO        
         ax_gain = self.control.add_axes([0.25, 0.02, 0.5, 0.03])
         
          
@@ -40,6 +41,8 @@ class Control:
         self.button_save = Button(ax_save, "Save Processed WAV", color="#98FB98")
         ax_gain = self.control.add_axes([0.25, 0.02, 0.5, 0.03])
         self.slider_gain = Slider(ax_gain, "PreGain", 1.0, 40.0, valinit=self.effects['PreGain']._gain_db)
+        self.button_bitcrusher = Button(ax_bitcrusher, 'BitCrusher', color="#00ffaa")  # <-- NUEVO
+        
         # assigns functions to the buttons when they are clicked
         self.botton_original.on_clicked(self.show_original_signal_graph)
         self.botton_hard.on_clicked(self.show_hard_graph)
@@ -49,6 +52,7 @@ class Control:
         self.button_load.on_clicked(self.load_wav)
         self.button_save.on_clicked(self.save_processed_audio)
         self.slider_gain.on_changed(self.update_gain)
+        self.button_bitcrusher.on_clicked(self.show_bitcrusher_graph)  # <-- NUEVO
         
     
     def update_gain(self, value):
@@ -124,6 +128,28 @@ class Control:
         F, T, S = spectrogram(signal_algebraic, self.guitar.samplerate)
         self.graphs.graphing_spectrogram('Spectrogram', T, F, S)
 
+    def show_bitcrusher_graph(self, event):
+        # Aplica el BitCrusher a la señal cargada
+        signal_bc = self.effects['BitCrusher'].apply(self.guitar.data)
+
+        time = time_x(signal_bc, self.guitar.samplerate)
+        self.graphs = Graphs(self.guitar, self.effects)
+
+        # Señal en el tiempo
+        self.graphs.graphing('BitCrusher', time, signal_bc, color="#00ffaa")
+
+        # FFT
+        frequencies, magnitude = fft(signal_bc, self.guitar.samplerate)
+        self.graphs.graphing_fft('BitCrusher FFT', frequencies, magnitude, color='red')
+
+        # Espectrograma
+        F, T, S = spectrogram(signal_bc, self.guitar.samplerate)
+        self.graphs.graphing_spectrogram('Spectrogram', T, F, S)
+
+        # Para que al guardar use este efecto como "clipping seleccionado"
+        self.selected_clipping = 'BitCrusher'
+
+
     def load_wav(self, event):
     # Hide root Tk window (we only want the file dialog)
         root = tk.Tk()
@@ -159,10 +185,10 @@ class Control:
         signal = clip.apply(signal)
         
         if self.use_oversampling:
-            signal = self.effects['oversampler'].downsample(signal)
+            signal = self.effects['Oversampler'].downsample(signal)
         
         self.effects['Filter'].apply(signal)
-        self.effects['Delay'].apply(signal)
+        self.effects['Delay'].apply(self.guitar)  # usamos el WavSignal original
         signal = self.effects['PostGain'].apply(signal)
         
         return signal
