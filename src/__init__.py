@@ -4,6 +4,7 @@ from src.audio_signal import *
 from src.graphs import *
 from src.filters import *
 from src.repeated_signals import *
+from src.bitcrusher import *
 
 __all__ = [
     'Control',
@@ -17,5 +18,7 @@ __all__ = [
     'Graphs',
     'PassbandFilter',
     'RepeatedSignals',
-    'Delay'
+    'Delay',
+    'BitCrusher',
+    'Reverb'
 ]
