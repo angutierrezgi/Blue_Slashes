@@ -5,7 +5,7 @@ from audio_signal import WavSignal
 from distortion import HardClipping, Softclipping, TanhClipping, AtanClipping, AlgebraicClipping
 from filters import PassbandFilter, Oversampler
 from graphs import Graphs
-from repeated_signals import Delay, Reverb
+from repeated_signals import Delay, Reverb, Reverb
 from audio_signal import PreGain, PostGain  
 from bitcrusher import BitCrusher  # <-- NUEVO
    
@@ -34,7 +34,9 @@ def main():
                'Oversampler': oversampler,
                'PreGain': pregain,
                'PostGain': postgain,
-               'BitCrusher': bitcrusher}
+               'BitCrusher': bitcrusher,
+               'Reverb': reverb
+               }
 
     control = Control(effects) 
     control.show_control_window()
