@@ -24,9 +24,6 @@ def main():
     postgain = PostGain()
     bitcrusher = BitCrusher(bit_depth=4, downsample_factor=8, mix=1.0)
     reverb = Reverb("canyon")
-
-    guitar = WavSignal.archive('Guitar G minor 170bpm.wav')
-    guitar.normalize()
     
     effects = {'Hard': hard_clipped ,
                'Tanh': tanh_clipped ,
@@ -39,11 +36,8 @@ def main():
                'PostGain': postgain,
                'BitCrusher': bitcrusher}
 
-    #control = Control(effects) 
-    #control.show_control_window()
-    sf.write("delay_test.wav", delay_effect.apply(guitar), guitar.samplerate)
-    sf.write("test.wav", reverb.apply(guitar), guitar.samplerate)
-    
+    control = Control(effects) 
+    control.show_control_window()
        
 
 if __name__ == "__main__":
