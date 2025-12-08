@@ -24,7 +24,6 @@ def main():
     postgain = PostGain()
     bitcrusher = BitCrusher(bit_depth=4, downsample_factor=8, mix=1.0)
     reverb = Reverb("canyon")
-
     
     effects = {'Hard': hard_clipped ,
                'Tanh': tanh_clipped ,
