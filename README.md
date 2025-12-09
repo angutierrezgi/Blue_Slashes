@@ -192,6 +192,59 @@ Este sistema de distorsión también permite modificar el carácter del efecto m
    
   $y = \tanh((x + o))$
 
+## BitCrushing
+
+El **bitcrushing** es un efecto digital que degrada intencionalmente la calidad de la señal, reduciendo la **resolución en bits** y la **resolución temporal**. Es típico de sonidos *lo-fi*, videojuegos retro y música experimental.
+
+En este proyecto se implementa como un procesador independiente (`BitCrusher`) que hereda de `ProcessorSignal` y trabaja sobre la señal normalizada en el rango \([-1, 1]\).
+
+### Parámetros del efecto
+
+- **`bit_depth`**: número efectivo de bits con los que se representa la amplitud.  
+  Menos bits ⇒ menos niveles ⇒ más distorsión digital.
+
+- **`downsample_factor`**: factor de reducción temporal.  
+  Aumentarlo hace que la señal tenga menos muestras “distintas” a lo largo del tiempo (*sample & hold*).
+
+- **`mix`**: mezcla entre señal original (*dry*) y señal procesada (*wet*).
+
+### Reducción de resolución temporal
+
+Para reducir la resolución temporal se aplica un esquema de *sample & hold*:  
+solo se toma una muestra cada \(N\) puntos (donde \(N = \text{downsample\_factor}\)) y ese valor se repite hasta la siguiente muestra seleccionada.  
+Esto introduce escalones en la forma de onda y agrega componentes de aliasing en el espectro.
+
+### Reducción de resolución en bits
+
+La reducción de bits se implementa mediante cuantización uniforme sobre la señal normalizada:
+
+\[
+\text{levels} = 2^{\text{bit\_depth}}, 
+\quad 
+\text{max\_int} = \frac{\text{levels}}{2} - 1
+\]
+
+Cada muestra \(x\) se aproxima al nivel más cercano:
+
+\[
+x_q = \frac{\mathrm{round}(x \cdot \text{max\_int})}{\text{max\_int}}
+\]
+
+Al forzar a la señal a tomar solo unos cuantos niveles discretos, se obtiene el característico sonido granulado del bitcrushing.
+
+### Mezcla wet/dry
+
+Finalmente, la señal procesada se combina con la original usando el parámetro `mix`:
+
+\[
+y = (1 - \text{mix}) \cdot x + \text{mix} \cdot x_q
+\]
+
+De esta forma se puede controlar qué tan extremo es el efecto:
+
+- `mix` cercano a **1** produce un sonido muy degradado y digital.  
+- valores intermedios permiten añadir textura sin perder totalmente el carácter de la señal original.
+
 ## Filtrado Pasabanda
 El filtrado Pasabanda se diseña para dejar pasar solo un rango especifico de frecuencias que viven en la señal, atenuando las que se encuentran por encima o debajo de los limites definidos.
 
@@ -458,6 +511,17 @@ classDiagram
         +set_pre_delay()
 	}
 
+    class BitCrusher {
+        +str name
+        +int bit_depth
+        +int downsample_factor
+        +float mix
+        +apply(WavSignal)
+        +set_bit_depth()
+        +set_downsample_factor()
+        +set_mix()
+    }
+
     class Control {
         +array guitar
         +list efects
@@ -494,4 +558,5 @@ classDiagram
     Graphs *.. Control
     WavSignal <-- Graphs
     ProcessorSignal <-- Graphs
+    ProcessorSignal <|-- BitCrusher
 ```
