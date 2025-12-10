@@ -32,38 +32,34 @@ class RepeatedSignals(ProcessorSignal):
 
     def apply(self, signal):
         raise NotImplementedError
-    
+
 class Delay(RepeatedSignals):
-    def __init__(self, dampening = 0.6, seconds=0.5, impact=3):
-        super().__init__("Delay Effect", seconds, impact)
-        self.dampening = dampening # Percentage in which the effect is dampened by
-    def apply(self, signal, samplerate=44100):
-        
+    def __init__(self, dampening = 0.6, seconds=0.5, repeats=3):
+        super().__init__("Delay Effect", seconds, repeats, dampening)
+    
+    def apply(self, signal, samplerate = 44100):
         signal = np.asarray(signal)
-            
-        # We copy the original data as an array of floats
+
+        # Start with the original signal as float
         output = np.copy(signal).astype(float)
+        for i in range(1, self._repeats + 1):
+            delay_samples = int(self._seconds * samplerate * i)
 
-        for i in range(1, self.impact +1):
-            # Convert the seconds to samplerate (Hz)
-            delay_samples = int(self.seconds * samplerate * i)
+            # Create the delayed, dampened echo
+            echo = np.zeros(delay_samples + len(signal), dtype=float)
+            echo[delay_samples:] = output[:len(signal)] * (self._dampening ** i)
 
-            # Creates an array of zeros (seconds of silence) according to the delay provided
-            # and unites it with the dampened signal
-            silent_padding = np.zeros(delay_samples, dtype=signal.dtype)
-            delayed_data = np.concatenate((silent_padding, signal * (self.dampening ** i)))
+            # Pad output if needed
+            if len(echo) > len(output):
+                output = np.pad(output, (0, len(echo) - len(output)), mode='constant')
 
-            # Makes both audio signals have the same length, by adding to the original
-            # or cutting from this one as well
-            if len(delayed_data) >= len(signal):
-                output = np.concatenate((signal, np.zeros(len(delayed_data) - len(signal), dtype=signal.dtype)))
-            else:
-                output = signal[:len(delayed_data)]
+            # Add echo to output
+            output[:len(echo)] += echo
 
-            # Adds the delayed audio signal to the expected output, so that it has the effect
-            # applied 'impact' amount of times
-            output[:len(delayed_data)] += delayed_data
-            
+        # Normalize to prevent clipping
+        max_val = np.max(np.abs(output))
+        if max_val > 0:
+            output = output / max_val
         return output
     
 class Reverb(RepeatedSignals):
@@ -94,33 +90,41 @@ class Reverb(RepeatedSignals):
             raise TypeError("The new value should be an integer or float")
         self._pre_delay = value
 
-    def apply(self, signal):
-        wet_data = np.copy(signal.data).astype(float)
-        dry_data = np.copy(signal.data).astype(float)
-        max_len = len(signal.data)
+    def apply(self, signal, samplerate = 44100):
+        signal = np.asarray(signal)
+
+        wet_data = np.copy(signal).astype(float)
+        dry_data = np.copy(signal).astype(float)
+        max_len = len(signal)
 
         for i in range(1, self._repeats + 1):
             # Adding randomness to the time and samplerate of each echo
             delay_time = self._seconds * (1 + (0.2 * np.random.randn()))
-            delay_samples = int((self._pre_delay + delay_time * i) * signal.samplerate)
+            delay_samples = int((self._pre_delay + delay_time * i) * samplerate)
+
             # Adding randomness to the dampening
             new_damp = self._dampening ** (i * (1 + (0.1 * np.random.randn())))
-            echo = np.zeros(delay_samples + len(signal.data), dtype="float")
+            echo = np.zeros(delay_samples + len(signal), dtype="float")
+
             # Adding the passband filter to, return less of the higher frequencies
             # also, we add a randomness to the amount of frequencies of each echo
             passband = PassbandFilter(100, 2800 * (1 + (0.2 * np.random.randn())), 44100, 4)
-            filtered = passband.apply(signal.data) * new_damp
-            echo[delay_samples: delay_samples + len(signal.data)] = filtered
+            filtered = passband.apply(signal) * new_damp
+            echo[delay_samples: delay_samples + len(signal)] = filtered
+
             # We match both the echo's and the output data's length 
             if len(echo) > len(wet_data):
                 wet_data = np.pad(wet_data, (0, len(echo) - len(wet_data)), mode="constant")
             wet_data[:len(echo)] += echo
             max_len = max(max_len, len(echo))
+
         # Pad dry to match output length
         if len(wet_data) > len(dry_data):
             dry_data = np.pad(dry_data, (0, len(wet_data) - len(dry_data)), mode='constant')
+
         # Mix dry and wet
         result = (1 - self._wet) * dry_data + self._wet * wet_data
+
         # Normalize the result to prevent clipping
         max_val = np.max(np.abs(result))
         if max_val > 0:

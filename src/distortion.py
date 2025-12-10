@@ -38,7 +38,6 @@ class Distortion(ProcessorSignal):
     def set_offset(self, value):
         self._offset = max(-0.8, min(0.8, value))    
         
-
 class HardClipping(Distortion):
     def __init__(self, umbral=0.7, variation=0.0, offset=0.0, mode="simetric"):
         super().__init__("Hard Clipping", umbral, variation, offset, mode)
@@ -51,9 +50,6 @@ class HardClipping(Distortion):
     def set_umbral(self, value):
         self._umbral = max(0.1, min(1.0, value))
        
-        
-        
-    
     def get_variation(self):
         return self._variation
 
@@ -88,9 +84,7 @@ class HardClipping(Distortion):
     def apply_asimetric_displacement(self, signal):
         signal_offset = self._offset + signal
         return np.clip(np.asarray(signal_offset, dtype=float), -self._umbral, self._umbral)
-
-        
-        
+  
 # type of distortion: signal proccesed by specific functions
 class Softclipping(Distortion):
     def __init__(self, nombre, umbral= 1.0, variation = 0.0, offset=0.0, mode = "simetric"):
@@ -116,6 +110,7 @@ class TanhClipping(Softclipping):
     def apply_asimetric_displacement(self, signal):
         signal_offset = self._offset + signal
         return np.tanh(np.asarray(signal_offset, dtype=float))
+    
 # type of soft clipping: signal proccesed by Atan function    
 class AtanClipping(Softclipping):
     def __init__(self, umbral= 1.0, variation = 0.0, offset = 0.0, mode = "simetric"):

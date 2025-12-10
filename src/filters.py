@@ -3,7 +3,6 @@ from audio_signal import ProcessorSignal
 import numpy as np
 
 class PassbandFilter(ProcessorSignal):
-
     def __init__(self, low_frequency = 400.0, high_frequency = 4000.0, sampling_frequency = 44100, order=2):
         super().__init__("band pass filter")
         # Cutoff frequencies in Hz

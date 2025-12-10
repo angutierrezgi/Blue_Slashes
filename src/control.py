@@ -9,6 +9,7 @@ from matplotlib.gridspec import GridSpec
 from graphs import Graphs
 from audio_signal import WavSignal, time_x, fft, spectrogram
 from distortion import HardClipping
+
 class Control:
     def __init__(self, effects, style='dark_background'):
         plt.style.use(style) # assigns a style to the plots
@@ -20,7 +21,6 @@ class Control:
         self.use_filter = True
         self.selected_clipping = 'Hard'
         self.guitar = None
-        
         
         # creates principal window "Control" and assings to it rows and columns
         self.control = plt.figure(figsize=(12,4), edgecolor='black') 
@@ -194,7 +194,7 @@ class Control:
         # when change to variation
         effect = self.effects[self.selected_clipping]
     
-    # Polimorfismo: call to HardClipping.set_variation() or Distortion.set_variation()
+    # Polymorfism: call to HardClipping.set_variation() or Distortion.set_variation()
         effect.set_variation(value)
     
         if self.graphs and self.guitar:
@@ -203,16 +203,16 @@ class Control:
     def _on_offset_changed(self, value):
         effect = self.effects[self.selected_clipping]
     
-        # Polimorfismo: call to correct setter 
+        # Polymorfism: call to correct setter 
         effect.set_offset(value)
     
         if self.graphs and self.guitar:
             self._refresh_current_graph()
             
     def _update_hard_limits(self, hard_effect):
-        """Actualiza límites dinámicos para HardClipping"""
+        """Updates dinamic limits for HardClipping"""
         umbral = hard_effect.get_umbral()
-        limit = umbral * 0.8  # 80% del umbral
+        limit = umbral * 0.8  # 80% of threshold
     
         # Update variation slider range
         self.slider_variation.valmin = -limit
@@ -257,11 +257,9 @@ class Control:
         F, T, S = spectrogram(signal, self.guitar.samplerate)
         self.graphs.graphing_spectrogram(f'Spectrogram - {title}', T, F, S)
 
-
     def set_view_mode(self, mode):
         self.view_mode = mode
         print(f"View mode: {mode}")
-    
     
     def toggle_oversampling(self, label):
         """Callback for toggle of oversampling"""
@@ -269,7 +267,7 @@ class Control:
         status = "ON" if self.use_oversampling else "OFF"
         print(f"Oversampling: {status}")
     
-        # actualice graph if it exist
+        # update graph if it exists
         if self.graphs and self.guitar:
             self._refresh_current_graph()
         
@@ -325,8 +323,7 @@ class Control:
         else: 
             signal = self.guitar
             title = 'Original signal'
-            
-                
+                            
         if not self.graphs:
             self.graphs = Graphs(self.guitar, self.effects)
             
@@ -381,7 +378,7 @@ class Control:
         self.show_current_settings_graph(event)
 
     def _get_effect_color(self):
-        """Devuelve color según efecto seleccionado"""
+        """Returns color according to the effect selected"""
         colors = {
             'Hard': '#ff0000',
             'Tanh': '#ff00d0', 
@@ -439,7 +436,7 @@ class Control:
         plt.show(block=True)  
         
 
-_tk_root_instance = None  # Variable global para el singleton
+_tk_root_instance = None  # Globar variable for Singleton
 
 def get_tk_root():
     """Devuelve una única instancia de Tk() para toda la aplicación"""
