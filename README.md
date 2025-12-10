@@ -212,24 +212,24 @@ En este proyecto se implementa como un procesador independiente (`BitCrusher`) q
 ### Reducción de resolución temporal
 
 Para reducir la resolución temporal se aplica un esquema de *sample & hold*:  
-solo se toma una muestra cada \(N\) puntos (donde \(N = \text{downsample\_factor}\)) y ese valor se repite hasta la siguiente muestra seleccionada.  
+solo se toma una muestra cada \(N\) puntos (donde \(N = $\text{downsample\-factor}$\)) y ese valor se repite hasta la siguiente muestra seleccionada.  
 Esto introduce escalones en la forma de onda y agrega componentes de aliasing en el espectro.
 
 ### Reducción de resolución en bits
 
 La reducción de bits se implementa mediante cuantización uniforme sobre la señal normalizada:
 
-\[
-\text{levels} = 2^{\text{bit\_depth}}, 
+$$
+\text{levels} = 2^{\text{bit\-depth}}, 
 \quad 
-\text{max\_int} = \frac{\text{levels}}{2} - 1
-\]
+\text{max\-int} = \frac{\text{levels}}{2} - 1
+$$
 
 Cada muestra \(x\) se aproxima al nivel más cercano:
 
-\[
-x_q = \frac{\mathrm{round}(x \cdot \text{max\_int})}{\text{max\_int}}
-\]
+$$
+x\_q = \frac{\mathrm{round}(x \cdot \text{max\-int})}{\text{max\-int}}
+$$
 
 Al forzar a la señal a tomar solo unos cuantos niveles discretos, se obtiene el característico sonido granulado del bitcrushing.
 
@@ -237,9 +237,9 @@ Al forzar a la señal a tomar solo unos cuantos niveles discretos, se obtiene el
 
 Finalmente, la señal procesada se combina con la original usando el parámetro `mix`:
 
-\[
-y = (1 - \text{mix}) \cdot x + \text{mix} \cdot x_q
-\]
+
+$y = (1 - \text{mix}) \cdot x + \text{mix} \cdot x_q$
+
 
 De esta forma se puede controlar qué tan extremo es el efecto:
 
