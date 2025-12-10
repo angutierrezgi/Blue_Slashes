@@ -46,8 +46,9 @@ graph TD
     D2 --> E
     E --> F[Anti-alias LPF]
     F --> G[Downsample]
-    G --> H[Post-Gain dB]
-    H --> I[Output Signal]
+    G --> H[PassbandFilter]
+    H --> I[Post-Gain dB]
+    J --> K[Output Signal]
 ```
 ### Pre-Gain
 Antes de procesar la señal normalizada por el Clipping, se multiplica ese vector de muestreo, por un factor, que dado un valor lineal, se convierte a uno en escala logaritmica (dB):
@@ -245,7 +246,6 @@ De esta forma se puede controlar qué tan extremo es el efecto:
 - `mix` cercano a **1** produce un sonido muy degradado y digital.  
 - valores intermedios permiten añadir textura sin perder totalmente el carácter de la señal original.
 
-
 ## Filtrado Pasabanda
 El filtrado Pasabanda se diseña para dejar pasar solo un rango especifico de frecuencias que viven en la señal, atenuando las que se encuentran por encima o debajo de los limites definidos.
 
@@ -299,14 +299,28 @@ Así el comportamiento en la salida las frecuencias dentro de la banda mantienen
 Entre mas se incremente el orden, mayor sera la pendiente de atenuación.
 
 ## Efectos de Repetición
-Los efectos de Repetición sobre el tiempo, basan su funcionalidad en guardar la señal de audio y repetirla posteriormente con diferentes alteraciones a los datos de entrada.
+Los Efectos de Repetición sobre el tiempo, basan su funcionalidad en guardar la señal de audio y repetirla posteriormente con diferentes alteraciones a los datos de entrada.
+
+### Implementación General
+Ambos efectos tienen una implementación similar, que puede resumirse en el siguiente diagrama de flujo:
+
+```mermaid
+flowchart LR
+    A["Input"] -- SoundFile Library --> B("Data, Samplerate")
+    B --> C{"Effect"}
+    C -- NumPy --> D("Echo")
+    D -- "n times - Adjust Length" --> C
+    D -- Normalize --> E["Output"]
+```
 
 ### Delay
-El delay guarda la señal de audio en la memoria, y la emplea nuevamente según los datos de la pista de audio proveída y los atributos declarados por el usuario. En este caso, fue trabajado por el paquete Soundfile, y su manejo de la data por medio de arrays de la librería Numpy.
+El delay guarda la señal de audio en la memoria, y la emplea nuevamente según los datos de la pista de audio proveída y los atributos declarados por el usuario. 
+
+Librerías: Se hace uso de la librería Soundfile para manejar la data y samplerate de las entradas de audio. Y de la librería Numpy para trabajar estos datos como arrays.
 
 Así, sus parámetros son:
 - seconds: segundos después de los cuales se repite la pista de audio
-- impact: cantidad de veces la cual el efecto es repetido
+- repeats: cantidad de veces la cual el efecto es repetido
 - dampening: porcentaje por el cual la señal repetida se debilita
 
 Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que seguir la siguiente tabla (valores con respecto a un BPM de 120), de manera que al repetir la señal, no suene fuera de lugar, sino que contribuya a la pista.
@@ -325,6 +339,20 @@ Para aplicar los efectos de delay de manera que suenen coherentes, se tiene que 
 | 1/512	| 3.91 ms / 256 Hz | 5.86 ms / 170.67 Hz |	2.6 ms / 384 Hz |
 
 Fuente: [Delay & Reverb Calculator](https://anotherproducer.com/online-tools-for-musicians/delay-reverb-time-calculator)
+
+### Reverb
+El reverb es un efecto basado en imitar un sonido de eco de manera natural, a diferencia del delay que es repetido dado unos atrtibutos constantes y definidos. Por su parte el reverb hace uso de aleatoriedad, para generar un sonido más cálido y humano al realizar sus ecos.
+
+Librerías: Nuevamente se hace uso de Numpy, para trabajar con los arrays de data, y el uso de random.randn para generar aleatoriedad con respecto a la distribución normal, y crear valores con no mucha desviación.
+
+También hacemos uso del Filtro Pasabanda implementado con anterioridad, esta vez como un Filtro PasaBajo, haciendo que las frecuencias altas no estén presentes en los ecos, haciendo que suenen como en un entorno real, con variación aleatoria implementada por Numpy.
+
+Sus parámetros entonces, son:
+- seconds: segundos después de los cuales se producen los ecos
+- repeats: cantidad de repeticiones de los ecos
+- dampening: porcentaje por el cual cada eco se debilita
+- wet: porcentaje de mezcla entre la señal original, y la señal con ecos aplicados
+- pre_delay: intervalo fijo antes que empiecen los ecos posteriores
 
 ## Gestión de gráficas - visualización de señales y efectos
 La visualización se realiza mediante matplotlib, integrando las representaciones en el dominio del tiempo, la FFT y el espectrograma.
@@ -449,15 +477,8 @@ classDiagram
         +apply_asimetric_cutting()
         +apply_asimetric_displacement()
     }
-
-    class RepeatedSignals {
-        +str name
-        #float seconds
-        #int impact
-        +apply()
-    }
-
-    class Delay {
+    
+	  class RepeatedSignals {
         +str name
         #float seconds
         #int impact
@@ -469,7 +490,27 @@ classDiagram
         +set_impact()
         +get_dampening()
         +set_dampening()
+	  }
+
+    class Delay {
+        +str name
+        #float seconds
+        #int impact
+        #float dampening
+        +apply()
+
     }
+    class Reverb {
+        +str name
+        #float seconds
+        #int impact
+        #float dampening
+        +apply()
+        +get_wet()
+        +set_wet()
+        +get_pre_delay()
+        +set_pre_delay()
+	}
 
     class BitCrusher {
         +str name
@@ -515,12 +556,12 @@ classDiagram
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
-
     RepeatedSignals <|-- Delay
-
+    RepeatedSignals <|-- Reverb
     ProcessorSignal <.. Control
     WavSignal <.. Control
     Graphs *.. Control
     WavSignal <-- Graphs
     ProcessorSignal <-- Graphs
+    ProcessorSignal <|-- BitCrusher
 ```
