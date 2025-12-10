@@ -14,26 +14,28 @@ class Delay(RepeatedSignals):
     def __init__(self, dampening = 0.6, seconds=0.5, impact=3):
         super().__init__("Delay Effect", seconds, impact)
         self.dampening = dampening # Percentage in which the effect is dampened by
-    
-    def apply(self, signal):
+    def apply(self, signal, samplerate=44100):
+        
+        signal = np.asarray(signal)
+            
         # We copy the original data as an array of floats
-        output = np.copy(signal.data).astype(float)
+        output = np.copy(signal).astype(float)
 
         for i in range(1, self.impact +1):
             # Convert the seconds to samplerate (Hz)
-            delay_samples = int(self.seconds * signal.samplerate * i)
+            delay_samples = int(self.seconds * samplerate * i)
 
             # Creates an array of zeros (seconds of silence) according to the delay provided
             # and unites it with the dampened signal
-            silent_padding = np.zeros(delay_samples, dtype=signal.data.dtype)
-            delayed_data = np.concatenate((silent_padding, signal.data * (self.dampening ** i)))
+            silent_padding = np.zeros(delay_samples, dtype=signal.dtype)
+            delayed_data = np.concatenate((silent_padding, signal * (self.dampening ** i)))
 
             # Makes both audio signals have the same length, by adding to the original
             # or cutting from this one as well
-            if len(delayed_data) >= len(signal.data):
-                output = np.concatenate((signal.data, np.zeros(len(delayed_data) - len(signal.data), dtype=signal.data.dtype)))
+            if len(delayed_data) >= len(signal):
+                output = np.concatenate((signal, np.zeros(len(delayed_data) - len(signal), dtype=signal.dtype)))
             else:
-                output = signal.data[:len(delayed_data)]
+                output = signal[:len(delayed_data)]
 
             # Adds the delayed audio signal to the expected output, so that it has the effect
             # applied 'impact' amount of times

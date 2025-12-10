@@ -46,8 +46,9 @@ graph TD
     D2 --> E
     E --> F[Anti-alias LPF]
     F --> G[Downsample]
-    G --> H[Post-Gain dB]
-    H --> I[Output Signal]
+    G --> H[PassbandFilter]
+    H --> I[Post-Gain dB]
+    J --> K[Output Signal]
 ```
 ### Pre-Gain
 Antes de procesar la señal normalizada por el Clipping, se multiplica ese vector de muestreo, por un factor, que dado un valor lineal, se convierte a uno en escala logaritmica (dB):
