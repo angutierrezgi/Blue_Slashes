@@ -10,8 +10,6 @@ from audio_signal import PreGain, PostGain
 from bitcrusher import BitCrusher  # <-- NUEVO
    
 def main():
-    guitar = WavSignal.archive('Guitar G minor 170bpm.wav')
-    guitar.normalize()
 
     pregain = PreGain()
     oversampler = Oversampler()
@@ -24,7 +22,6 @@ def main():
     postgain = PostGain()
     bitcrusher = BitCrusher(bit_depth=4, downsample_factor=8, mix=1.0)
     reverb = Reverb("canyon")
-    
     effects = {'Hard': hard_clipped ,
                'Tanh': tanh_clipped ,
                'Atan': atan_clipped,
@@ -34,7 +31,7 @@ def main():
                'Oversampler': oversampler,
                'PreGain': pregain,
                'PostGain': postgain,
-               'BitCrusher': bitcrusher,
+               'BitCrusher': bitcrusher, 
                'Reverb': reverb
                }
 
