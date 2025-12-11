@@ -10,6 +10,7 @@ from matplotlib.gridspec import GridSpec
 from graphs import Graphs
 from audio_signal import WavSignal, time_x, fft, spectrogram
 from distortion import HardClipping
+
 class Control:
     def __init__(self, effects, style='dark_background'):
         plt.style.use(style) # assigns a style to the plots
@@ -24,7 +25,6 @@ class Control:
         self.use_filter = False
         self.selected_clipping = 'Hard'
         self.guitar = None
-        
         
         # creates principal window "Control" and assings to it rows and columns
         self.control = plt.figure(figsize=(12,4), edgecolor='black') 
@@ -735,7 +735,7 @@ class Control:
         # when change to variation
         effect = self.effects[self.selected_clipping]
     
-    # Polimorfismo: call to HardClipping.set_variation() or Distortion.set_variation()
+    # Polymorfism: call to HardClipping.set_variation() or Distortion.set_variation()
         effect.set_variation(value)
     
         if self.graphs and self.guitar:
@@ -744,7 +744,7 @@ class Control:
     def _on_offset_changed(self, value):
         effect = self.effects[self.selected_clipping]
     
-        # Polimorfismo: call to correct setter 
+        # Polymorfism: call to correct setter 
         effect.set_offset(value)
     
         if self.graphs and self.guitar:
@@ -753,7 +753,7 @@ class Control:
     def _update_hard_limits(self, hard_effect):
         """update limits of variation and offset sliders for HardClipping"""
         umbral = hard_effect.get_umbral()
-        limit = umbral * 0.8  # 80% del umbral
+        limit = umbral * 0.8  # 80% of threshold
     
         # Update variation slider range
         self.slider_variation.valmin = -limit
@@ -858,8 +858,7 @@ class Control:
         else: 
             signal = self.guitar
             title = 'Original signal'
-            
-                
+                            
         if not self.graphs:
             self.graphs = Graphs(self.guitar, self.effects)
             

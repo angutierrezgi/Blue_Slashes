@@ -32,7 +32,7 @@ class RepeatedSignals(ProcessorSignal):
 
     def apply(self, signal):
         raise NotImplementedError
-    
+
 class Delay(RepeatedSignals):
     def __init__(self, dampening = 0.6, seconds=0.5, repeats=3):
         super().__init__("Delay Effect", seconds, repeats, dampening)
@@ -82,6 +82,8 @@ class Delay(RepeatedSignals):
         signal = np.asarray(signal)
 
         # Start with the original signal as float
+
+        # Start with the original signal as float
         output = np.copy(signal).astype(float)
         for i in range(1, self._repeats + 1):
             delay_samples = int(self._seconds * samplerate * i)
@@ -89,7 +91,21 @@ class Delay(RepeatedSignals):
             # Create the delayed, dampened echo
             echo = np.zeros(delay_samples + len(signal), dtype=float)
             echo[delay_samples:] = output[:len(signal)] * (self._dampening ** i)
+            # Create the delayed, dampened echo
+            echo = np.zeros(delay_samples + len(signal), dtype=float)
+            echo[delay_samples:] = output[:len(signal)] * (self._dampening ** i)
 
+            # Pad output if needed
+            if len(echo) > len(output):
+                output = np.pad(output, (0, len(echo) - len(output)), mode='constant')
+
+            # Add echo to output
+            output[:len(echo)] += echo
+
+        # Normalize to prevent clipping
+        max_val = np.max(np.abs(output))
+        if max_val > 0:
+            output = output / max_val
             # Pad output if needed
             if len(echo) > len(output):
                 output = np.pad(output, (0, len(echo) - len(output)), mode='constant')

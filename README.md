@@ -212,24 +212,24 @@ En este proyecto se implementa como un procesador independiente (`BitCrusher`) q
 ### Reducción de resolución temporal
 
 Para reducir la resolución temporal se aplica un esquema de *sample & hold*:  
-solo se toma una muestra cada \(N\) puntos (donde \(N = \text{downsample\_factor}\)) y ese valor se repite hasta la siguiente muestra seleccionada.  
+solo se toma una muestra cada \(N\) puntos (donde \(N = $\text{downsample\-factor}$\)) y ese valor se repite hasta la siguiente muestra seleccionada.  
 Esto introduce escalones en la forma de onda y agrega componentes de aliasing en el espectro.
 
 ### Reducción de resolución en bits
 
 La reducción de bits se implementa mediante cuantización uniforme sobre la señal normalizada:
 
-\[
-\text{levels} = 2^{\text{bit\_depth}}, 
+$$
+\text{levels} = 2^{\text{bit\-depth}}, 
 \quad 
-\text{max\_int} = \frac{\text{levels}}{2} - 1
-\]
+\text{max\-int} = \frac{\text{levels}}{2} - 1
+$$
 
 Cada muestra \(x\) se aproxima al nivel más cercano:
 
-\[
-x_q = \frac{\mathrm{round}(x \cdot \text{max\_int})}{\text{max\_int}}
-\]
+$$
+x\_q = \frac{\mathrm{round}(x \cdot \text{max\-int})}{\text{max\-int}}
+$$
 
 Al forzar a la señal a tomar solo unos cuantos niveles discretos, se obtiene el característico sonido granulado del bitcrushing.
 
@@ -237,9 +237,9 @@ Al forzar a la señal a tomar solo unos cuantos niveles discretos, se obtiene el
 
 Finalmente, la señal procesada se combina con la original usando el parámetro `mix`:
 
-\[
-y = (1 - \text{mix}) \cdot x + \text{mix} \cdot x_q
-\]
+
+$y = (1 - \text{mix}) \cdot x + \text{mix} \cdot x_q$
+
 
 De esta forma se puede controlar qué tan extremo es el efecto:
 
@@ -374,40 +374,40 @@ El siguiente diagrama, representa la estructuración del paquete de código hast
 ```mermaid
 classDiagram
     class WavSignal {
-	    +arr data
-	    +int samplerate[Hz]
-	    +str route
-	    +time()
-	    +archive(route)
-	    +normalize()
+        +arr data
+        +int samplerate_Hz
+        +str route
+        +time()
+        +archive(route)
+        +normalize()
         +fft()
         +spectogram()
     }
 
     class ProcessorSignal {
-	    +str name
-	    +apply(WavSignal)
+        +str name
+        +apply(WavSignal)
     }
 
     class PassbandFilter {
-	    +float low_frequency
-	    +float high_frequency
-	    +float sampling_frequency
-	    +int order
-	    +apply(WavSignal)
+        +float low_frequency
+        +float high_frequency
+        +float sampling_frequency
+        +int order
+        +apply(WavSignal)
     }
 
     class Distortion {
-	    +str name
-	    +str mode
-	    +float gain
-	    #float umbral
-	    #float variation
-	    #float offset
-	    +apply(WavSignal)
-	    +apply_simetric()
-	    +apply_asimetric_cutting()
-	    +apply_asimetric_displacement()
+        +str name
+        +str mode
+        +float gain
+        #float umbral
+        #float variation
+        #float offset
+        +apply(WavSignal)
+        +apply_simetric()
+        +apply_asimetric_cutting()
+        +apply_asimetric_displacement()
         +get_variation()
         +set_variation()
         +get_offset()
@@ -415,15 +415,15 @@ classDiagram
     }
 
     class HardClipping {
-	    +str name
-	    +str mode
-	    +float gain
-	    #float umbral
-	    #float variation
-	    #float offset
-	    +apply_simetric()
-	    +apply_asimetric_cutting()
-	    +apply_asimetric_displacement()
+        +str name
+        +str mode
+        +float gain
+        #float umbral
+        #float variation
+        #float offset
+        +apply_simetric()
+        +apply_asimetric_cutting()
+        +apply_asimetric_displacement()
         +get_umbral()
         +set_umbral()
         +get_variation()
@@ -433,79 +433,79 @@ classDiagram
     }
 
     class SoftClipping {
-	    +str name
-	    +str mode
-	    +float gain
-	    #float umbral
-	    #float variation
-	    #float offset
-	    #limit_asimetric_cuts()
+        +str name
+        +str mode
+        +float gain
+        #float umbral
+        #float variation
+        #float offset
+        #limit_asimetric_cuts()
     }
 
     class ClippingTanh {
-	    +str name
-	    +str mode
-	    +float gain
-	    #float umbral
-	    #float variation
-	    #float offset
-	    +apply_simetric()
-	    +apply_asimetric_cutting()
-	    +apply_asimetric_displacement()
+        +str name
+        +str mode
+        +float gain
+        #float umbral
+        #float variation
+        #float offset
+        +apply_simetric()
+        +apply_asimetric_cutting()
+        +apply_asimetric_displacement()
     }
 
     class ClippingAtan {
-	    +str name
-	    +str mode
-	    +float gain
-	    #float umbral
-	    #float variation
-	    #float offset
-	    +apply_simetric()
-	    +apply_asimetric_cutting()
-	    +apply_asimetric_displacement()
+        +str name
+        +str mode
+        +float gain
+        #float umbral
+        #float variation
+        #float offset
+        +apply_simetric()
+        +apply_asimetric_cutting()
+        +apply_asimetric_displacement()
     }
 
     class ClippingAlgebraic {
-	    +str name
-	    +str mode
-	    +float gain
-	    #float umbral
-	    #float variation
-	    #float offset
-	    +apply_simetric()
-	    +apply_asimetric_cutting()
-	    +apply_asimetric_displacement()
-        
+        +str name
+        +str mode
+        +float gain
+        #float umbral
+        #float variation
+        #float offset
+        +apply_simetric()
+        +apply_asimetric_cutting()
+        +apply_asimetric_displacement()
     }
-	class RepeatedSignals {
-		+str name
-		#float seconds
-		#int impact
-		#float dampening
-		+apply()
-		+get_seconds()
+    
+	  class RepeatedSignals {
+        +str name
+        #float seconds
+        #int impact
+        #float dampening
+        +apply()
+        +get_seconds()
         +set_seconds()
         +get_impact()
         +set_impact()
         +get_dampening()
         +set_dampening()
-	}
+	  }
 
-	class Delay {
-		+str name
-		#float seconds
-		#int impact
-		#float dampening
-		+apply()
-        
-	}
-	class Reverb {
-		+str name
-		#float seconds
-		#int impact
-		#float dampening
-		+apply()
+    class Delay {
+        +str name
+        #float seconds
+        #int impact
+        #float dampening
+        +apply()
+
+    }
+    class Reverb {
+        +str name
+        #float seconds
+        #int impact
+        #float dampening
+        +apply()
         +get_wet()
         +set_wet()
         +get_pre_delay()
@@ -525,35 +525,39 @@ classDiagram
 
     class Control {
         +array guitar
-        +list efects
+        +list effects
         +str style
         +show_original_signal_graph()
         +show_tanh_graph()
         +show_atan_graph()
         +show_algebraic_graph()
+        +show_bitcrusher_graph()
         +show_control_window()
     }
+
     class Graphs {
-	    +array guitar_signal
-	    +list effects
-	    +str style
-	    +graphing()
-	    +graphing_fft()
-	    +graphing_spectrogram()
-	    +show_filtered_graph()
+        +array guitar_signal
+        +list effects
+        +str style
+        +graphing()
+        +graphing_fft()
+        +graphing_spectrogram()
+        +show_filtered_graph()
     }
 
     WavSignal <.. ProcessorSignal
     ProcessorSignal <|-- PassbandFilter
     ProcessorSignal <|-- Distortion
-	ProcessorSignal <|-- RepeatedSignals
+    ProcessorSignal <|-- RepeatedSignals
+    ProcessorSignal <|-- BitCrusher
+
     Distortion <|-- HardClipping
     Distortion <|-- SoftClipping
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
-	RepeatedSignals <|-- Delay
-	RepeatedSignals <|-- Reverb
+    RepeatedSignals <|-- Delay
+    RepeatedSignals <|-- Reverb
     ProcessorSignal <.. Control
     WavSignal <.. Control
     Graphs *.. Control

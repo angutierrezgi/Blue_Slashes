@@ -1,4 +1,3 @@
-
 import soundfile as sf
 from control import Control
 from audio_signal import WavSignal
@@ -7,10 +6,9 @@ from filters import PassbandFilter, Oversampler
 from graphs import Graphs
 from repeated_signals import Delay, Reverb, Reverb
 from audio_signal import PreGain, PostGain  
-from bitcrusher import BitCrusher  # <-- NUEVO
+from bitcrusher import BitCrusher  
    
 def main():
-
     pregain = PreGain()
     oversampler = Oversampler()
     hard_clipped = HardClipping()
@@ -22,6 +20,7 @@ def main():
     postgain = PostGain()
     bitcrusher = BitCrusher(bit_depth=4, downsample_factor=8, mix=1.0)
     reverb = Reverb("canyon")
+
     effects = {'Hard': hard_clipped ,
                'Tanh': tanh_clipped ,
                'Atan': atan_clipped,
@@ -38,6 +37,5 @@ def main():
     control = Control(effects) 
     control.show_control_window()
        
-
 if __name__ == "__main__":
     main()

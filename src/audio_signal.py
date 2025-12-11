@@ -22,8 +22,7 @@ class WavSignal:
     # to the range [-1, 1]
     def normalize(self):
         self.data = self.data / np.max(np.abs(self.data))  
-     
-        
+             
 # class reserved for classes that process the signal in some way to inherit it
 class ProcessorSignal:
     def __init__(self, name = None):
@@ -33,7 +32,6 @@ class ProcessorSignal:
         raise NotImplementedError("subclasses have to implement it")
 
 class PreGain(ProcessorSignal):
-
     def __init__(self, gain_db=1):
         super().__init__("pre-gain")
         self._gain_db = gain_db
@@ -51,7 +49,6 @@ class PreGain(ProcessorSignal):
         return np.asarray(signal * gain, dtype=float)
 
 class PostGain(ProcessorSignal):
-
     def __init__(self, gain_db= 1):
         super().__init__("post-gain")
         self._post_gain_db = gain_db

@@ -4,7 +4,6 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.widgets import Button
 from audio_signal import time_x, fft, spectrogram
 
-
 class Graphs:
     def __init__(self, signal, effects, style='dark_background'):
         plt.style.use(style)
@@ -74,8 +73,7 @@ class Graphs:
         self.spectrum_signal.set_ylim(0, 4000) # limits y-axis to 4000 Hz
          # adds a colorbar to indicate the intensity of the spectrogram
         current_colorbar = self.window.colorbar(mesh, ax=self.spectrum_signal)
-       
-    
+           
         self.window.canvas.draw_idle()
 
     def show_filtered_graph(self, event):
