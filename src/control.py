@@ -6,7 +6,7 @@ import soundfile as sf
 from tkinter import Tk, filedialog
 from matplotlib.widgets import Button, Slider, CheckButtons, RadioButtons
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
+from  matplotlib.gridspec import GridSpec
 from graphs import Graphs
 from audio_signal import WavSignal, time_x, fft, spectrogram
 from distortion import HardClipping
