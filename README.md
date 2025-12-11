@@ -606,14 +606,37 @@ classDiagram
         +show_filtered_graph()
     }
 
+    class Pregain {
+        #int gain_db
+        +set_gain()
+        +apply()
+    }
+
+    class Postgain {
+        #int gain_db
+        +set_gain()
+        +apply()
+    }
+
+    class Oversampler {
+        +int factor
+        +int filter_length
+        +upsample()
+        +downsample()
+    }
+
     WavSignal <.. ProcessorSignal
     ProcessorSignal <|-- PassbandFilter
     ProcessorSignal <|-- Distortion
     ProcessorSignal <|-- RepeatedSignals
     ProcessorSignal <|-- BitCrusher
+    ProcessorSignal <|-- Pregain
+    ProcessorSignal <|-- Postgain
+    ProcessorSignal <|-- Oversampler
 
     Distortion <|-- HardClipping
     Distortion <|-- SoftClipping
+    Distortion <-- Oversampler
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
