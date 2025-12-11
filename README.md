@@ -553,13 +553,47 @@ classDiagram
     class Control {
         +array guitar
         +list effects
-        +str style
+        +str view_mode
+		+bool use_bitcrusher
+		+bool use_oversampler
+		+bool use_distortion
+		+bool use_reverb
+		+bool use_delay
+		+bool use_filter
+		+str selected_clipping
         +show_original_signal_graph()
         +show_tanh_graph()
         +show_atan_graph()
         +show_algebraic_graph()
         +show_bitcrusher_graph()
         +show_control_window()
+		#filter_panel_control()
+		#create_reverb_panel()
+		#create_delay_panel()
+		#create_bitcrushing_panel()
+		#create_distortion_panel()
+		#on_low_freq_changed()
+		#on_filter_order_changed()
+		#on_reverb_preset_changed()
+		#on_manual_reverb_changed()
+		#toggle_manual_sliders()
+		#on_dampening_changed()
+		#on_seconds_changed()
+		#on_repeats_changed()
+		#on_bit_depth_changed()
+		#on_downsample_changed()
+		#on_crusher_mix_changed()
+		#on_effect_changed()
+		#on_mode_changed()
+		#on_umbral_changed()
+		#on_variation_changed()
+		#on_offset_changed()
+		#update_hard_limits()
+		#refresh_current_graphs()
+		#apply_effects_solo()
+		#apply_full_chain()
+		#get_effect_color()
+		#style_checkbutton()
     }
 
     class Graphs {
