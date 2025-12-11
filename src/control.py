@@ -257,18 +257,17 @@ class Control:
         self.slider_dampening = Slider(ax_slider_dampening, 'Dampening', 0.1, 1.0, valinit=0.5)
         self.slider_dampening.on_changed(self._on_manual_reverb_changed)
     
-        # Inicialmente ocultar los sliders
         self._toggle_manual_sliders(visible=True)
         
     def _on_reverb_preset_changed(self, preset_label):
         if 'Reverb' not in self.effects:
             return
 
-        # Mostrar/ocultar sliders según el modo
+        # show/hide manual sliders
         if preset_label == 'Manual':
             self._toggle_manual_sliders(visible=True)
-        
-            # Si estamos en modo manual, cargar valores actuales a los sliders
+
+            # If we are in manual mode, load current values to sliders
             reverb_effect = self.effects['Reverb']
             self.slider_wet.set_val(reverb_effect.get_wet())
             self.slider_delay.set_val(reverb_effect.get_pre_delay())
@@ -325,11 +324,11 @@ class Control:
         ]
     
         for slider in sliders:
-            # Primero, hacer el eje visible/invisible
+            
             slider.ax.set_visible(visible)
 
         
-             # Elementos específicos del slider
+    
             if hasattr(slider, 'vline'):
                 slider.vline.set_visible(visible)
             if hasattr(slider, 'line'):
@@ -522,7 +521,6 @@ class Control:
             self.effects['BitCrusher'].set_bit_depth(bits)
         
         
-            # Actualizar gráfica si está activo
             if getattr(self, 'use_crusher', False) and self.graphs and self.guitar:
                 self._refresh_current_graph()
 
