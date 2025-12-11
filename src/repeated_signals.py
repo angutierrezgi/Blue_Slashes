@@ -37,8 +37,51 @@ class Delay(RepeatedSignals):
     def __init__(self, dampening = 0.6, seconds=0.5, repeats=3):
         super().__init__("Delay Effect", seconds, repeats, dampening)
     
+    
+    @property
+    def dampening(self):
+        return self._dampening
+    
+    @dampening.setter
+    def dampening(self, value):
+        # validation: 0.0 to 0.95 (prevent infinite feedback)
+        value = float(value)
+        if value < 0.0 or value > 0.95:
+            raise ValueError("Dampening must be between 0.0 and 0.95")
+        self._dampening = value
+        print(f"Delay dampening: {value:.2f}")
+    
+    @property 
+    def seconds(self):
+        return self._seconds
+    
+    @seconds.setter
+    def seconds(self, value):
+        # validation: seconds positive
+        value = float(value)
+        if value <= 0:
+            raise ValueError("Seconds must be positive")
+        self._seconds = value
+        print(f"Delay time: {value:.2f}s")
+    
+    @property
+    def repeats(self):
+        return self._repeats
+    
+    @repeats.setter
+    def repeats(self, value):
+        # validation: repeats integer positive
+        value = int(value)
+        if value <= 0:
+            raise ValueError("Repeats have to be a positive integer")
+        self._repeats = value
+        print(f"Delay repeats: {value}")
+    
+    
     def apply(self, signal, samplerate = 44100):
         signal = np.asarray(signal)
+
+        # Start with the original signal as float
 
         # Start with the original signal as float
         output = np.copy(signal).astype(float)
@@ -48,7 +91,21 @@ class Delay(RepeatedSignals):
             # Create the delayed, dampened echo
             echo = np.zeros(delay_samples + len(signal), dtype=float)
             echo[delay_samples:] = output[:len(signal)] * (self._dampening ** i)
+            # Create the delayed, dampened echo
+            echo = np.zeros(delay_samples + len(signal), dtype=float)
+            echo[delay_samples:] = output[:len(signal)] * (self._dampening ** i)
 
+            # Pad output if needed
+            if len(echo) > len(output):
+                output = np.pad(output, (0, len(echo) - len(output)), mode='constant')
+
+            # Add echo to output
+            output[:len(echo)] += echo
+
+        # Normalize to prevent clipping
+        max_val = np.max(np.abs(output))
+        if max_val > 0:
+            output = output / max_val
             # Pad output if needed
             if len(echo) > len(output):
                 output = np.pad(output, (0, len(echo) - len(output)), mode='constant')
@@ -75,7 +132,46 @@ class Reverb(RepeatedSignals):
         super().__init__("Reverb Effect", preset["seconds"], preset["repeats"], preset["dampening"])
         self._wet = preset["wet"] # Amount of mix between the echoes and clean signal
         self._pre_delay = preset["pre_delay"] # Pre-delay to make the sound more natural
-
+        self._ambient = ambient
+    
+    @property
+    def ambient(self):
+        return self._ambient
+    
+    @ambient.setter
+    def ambient(self, preset_name):
+        if preset_name not in self.ambient_presets and preset_name != "manual":
+            raise ValueError(f"Preset no válido. Opciones: {list(self.ambient_presets.keys())} o 'manual'")
+        
+        if preset_name != "manual":
+            preset = self.ambient_presets[preset_name]
+            self._ambient = preset_name
+            self._seconds = preset["seconds"]
+            self._repeats = preset["repeats"]
+            self._dampening = preset["dampening"]
+            self._wet = preset["wet"]
+            self._pre_delay = preset["pre_delay"]
+    def get_seconds(self):
+        return self._seconds
+    def set_seconds(self, value):
+        if not isinstance(value, (int, float)):
+            raise TypeError("The new value should be an integer or float.")
+        self._seconds = value
+    
+    def get_repeats(self):
+        return self._repeats
+    def set_repeats(self, value):
+        if not isinstance(value, int):
+            raise TypeError("The new value should be an integer")
+        self._repeats = value
+    
+    def get_dampening(self):
+        return self._dampening
+    def set_dampening(self, value):
+        if not isinstance(value, (int, float)):
+            raise TypeError("The new value should be an integer or float")
+        self._dampening = value
+    
     def get_wet(self):
         return self._wet
     def set_wet(self, value):

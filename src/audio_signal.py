@@ -51,18 +51,18 @@ class PreGain(ProcessorSignal):
 class PostGain(ProcessorSignal):
     def __init__(self, gain_db= 1):
         super().__init__("post-gain")
-        self._gain_db = gain_db
+        self._post_gain_db = gain_db
 
     def set_gain(self, gain_db):
         if gain_db > 20:
-            self._gain_db = 20
+            self._post_gain_db = 20
         elif gain_db < -20:
-            self._gain_db = -20
+            self._post_gain_db = -20
         else:
-            self._gain_db = gain_db
+            self._post_gain_db = gain_db
 
     def apply(self, signal):
-        gain = 10 ** (self._gain_db / 20)
+        gain = 10 ** (self._post_gain_db / 20)
         return np.asarray(signal, dtype = float) * gain
     
 
