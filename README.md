@@ -1,12 +1,39 @@
 # Blue_Slashes 
-### Modelado, simulación y análisis de efectos de audio para música experimental
 Este repositorio contiene el proyecto para la materia de Programación Orientada a Objetos (POO), semestre 2025-2.
+Somos el grupo **Blue Slashes**, y elegimos realizar una alternativa propia a las opciones marcadas en el repositorio del proyecto. Este se basa principalmente en tomar archivos de señal .wav y analizar su comportamiento al aplicarse efectos de audio, creados por nuestra autoría.
 
+Integrantes:
+- Samuel Escobar
+- Andrés Gutiérrez
+- Santiago Mendez
+
+Tanto nuestro grupo, como nuestro proyecto se llaman **Blue Slashes**, ya que hace alución a nuestra pasión por la música y las guitarras sobre todo, y nuestro enfoque a realizar un análisis más exhaustivo de la música a partir de la construcción de efectos de sonido.
+
+<img width="512" height="512" alt="Logo_Blue Slahes" align=center src="https://github.com/user-attachments/assets/3c1af1c6-6968-466e-a227-608833b68ad2" style="display: block; margin: auto;" />
+
+## Problema:
+### Modelado, simulación y análisis de efectos de audio para música experimental
 Basado en el paradigma de la POO, se modelan distintos efectos/procesadores digitales aplicados a señales de audio en formato '.wav'. Entre ellos por el momento se incluyen la distorsión (Hard y Soft Clipping), el delay y el filtrado pasabanda.
 
 Los efectos con un comportamiento espectral, como la distorsion o el filtrado, se analizan mediante la transformada rápida de Fourier y en espectrogramas, mientras que otros como el delay, se buscaria visualizarlos principalmente en el dominio del tiempo.
 
 Una interfaz gráfica interactiva permite observar como cada procesamiento influye en la forma de la onda y en su distribucion frecuencial, lo cual ofrece una herramienta de análisis y control en la experimentación sonora.
+
+### Instalación y uso
+Para hacer uso del código e implementación de análisis de archivos de audio, primero es necesario hacer un clon del repositorio en git, por medio de la consola de Git Bash, o la consola de VSCode propio. Esto se hace llamando la siguiente línea de código:
+
+```bash
+git clone https://github.com/angutierrezgi/Blue_Slashes
+```
+
+Luego de clonar el repositorio, procedemos a ejecutar el archivo *main.py* en VSCode con la tecla `F5`, o llamándolo desde la consola de la siguiente manera:
+```powershell
+python .\src\main.py
+```
+
+Luego, se ejecuta una ventana en la cual es posible cargar un propio archivo .wav, de manera que el código lo reconozca para realizar las interacciones con los diferentes efectos y gráficas seleccionada por el usuario:
+
+<img width="1556" height="681" alt="Ejemplo_1" src="https://github.com/user-attachments/assets/e1b2c72b-161b-4ea1-8af9-eb601134d635" />
 
 ## Representacion y procesamiento de la señal .wav
 La clase WavSignal modela una señal de audio en formato .wav, permitiendo su análisis en los dominios del tiempo y la frecuencia mediante operaciones fundamentales.
@@ -526,13 +553,47 @@ classDiagram
     class Control {
         +array guitar
         +list effects
-        +str style
+        +str view_mode
+		+bool use_bitcrusher
+		+bool use_oversampler
+		+bool use_distortion
+		+bool use_reverb
+		+bool use_delay
+		+bool use_filter
+		+str selected_clipping
         +show_original_signal_graph()
         +show_tanh_graph()
         +show_atan_graph()
         +show_algebraic_graph()
         +show_bitcrusher_graph()
         +show_control_window()
+		#filter_panel_control()
+		#create_reverb_panel()
+		#create_delay_panel()
+		#create_bitcrushing_panel()
+		#create_distortion_panel()
+		#on_low_freq_changed()
+		#on_filter_order_changed()
+		#on_reverb_preset_changed()
+		#on_manual_reverb_changed()
+		#toggle_manual_sliders()
+		#on_dampening_changed()
+		#on_seconds_changed()
+		#on_repeats_changed()
+		#on_bit_depth_changed()
+		#on_downsample_changed()
+		#on_crusher_mix_changed()
+		#on_effect_changed()
+		#on_mode_changed()
+		#on_umbral_changed()
+		#on_variation_changed()
+		#on_offset_changed()
+		#update_hard_limits()
+		#refresh_current_graphs()
+		#apply_effects_solo()
+		#apply_full_chain()
+		#get_effect_color()
+		#style_checkbutton()
     }
 
     class Graphs {
@@ -545,14 +606,37 @@ classDiagram
         +show_filtered_graph()
     }
 
+    class Pregain {
+        #int gain_db
+        +set_gain()
+        +apply()
+    }
+
+    class Postgain {
+        #int gain_db
+        +set_gain()
+        +apply()
+    }
+
+    class Oversampler {
+        +int factor
+        +int filter_length
+        +upsample()
+        +downsample()
+    }
+
     WavSignal <.. ProcessorSignal
     ProcessorSignal <|-- PassbandFilter
     ProcessorSignal <|-- Distortion
     ProcessorSignal <|-- RepeatedSignals
     ProcessorSignal <|-- BitCrusher
+    ProcessorSignal <|-- Pregain
+    ProcessorSignal <|-- Postgain
+    ProcessorSignal <|-- Oversampler
 
     Distortion <|-- HardClipping
     Distortion <|-- SoftClipping
+    Distortion <-- Oversampler
     SoftClipping <|-- ClippingTanh
     SoftClipping <|-- ClippingAtan
     SoftClipping <|-- ClippingAlgebraic
